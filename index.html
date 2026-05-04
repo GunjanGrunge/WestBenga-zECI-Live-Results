@@ -467,7 +467,8 @@
     }
 
     .round-meter {
-      display: flex;
+      display: grid;
+      grid-template-columns: 88px 44px;
       align-items: center;
       justify-content: flex-end;
       gap: 8px;
@@ -475,7 +476,7 @@
     }
 
     .mini-bar {
-      width: 58px;
+      width: 88px;
       height: 7px;
       background: #283648;
       border-radius: 999px;
@@ -496,7 +497,8 @@
     }
 
     .prob {
-      display: flex;
+      display: grid;
+      grid-template-columns: 112px 44px;
       gap: 8px;
       align-items: center;
       justify-content: flex-end;
@@ -507,7 +509,6 @@
     .prob .mini-bar {
       width: 112px;
       height: 10px;
-      flex: 0 0 112px;
     }
 
     .mini-bar .prob-bar {
