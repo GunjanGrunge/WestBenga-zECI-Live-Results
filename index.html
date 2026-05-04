@@ -154,7 +154,7 @@
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(5, minmax(130px, 1fr));
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
       gap: 12px;
       margin-bottom: 14px;
     }
@@ -175,6 +175,7 @@
     .card:nth-child(3) { animation-delay: 100ms; }
     .card:nth-child(4) { animation-delay: 150ms; }
     .card:nth-child(5) { animation-delay: 200ms; }
+    .card:nth-child(6) { animation-delay: 250ms; }
 
     .card-head {
       display: flex;
@@ -713,6 +714,10 @@
           <div class="value" id="progress">-</div>
         </div>
         <div class="card">
+          <div class="card-head"><div class="label">No Round Counted</div><span class="party-logo other-logo" aria-hidden="true"></span></div>
+          <div class="value" id="noRounds">-</div>
+        </div>
+        <div class="card">
           <div class="card-head"><div class="label">ECI Updated</div><span class="party-logo other-logo" aria-hidden="true"></span></div>
           <div class="value small-value" id="updated">-</div>
         </div>
@@ -830,6 +835,7 @@
           bjp: payload.summary?.bjp_leading_or_won || rows.filter((row) => row.leading_party === BJP).length,
           tmc: payload.summary?.tmc_leading_or_won || rows.filter((row) => row.leading_party === TMC).length,
           progress: payload.summary?.in_progress || rows.filter((row) => /progress/i.test(row.status)).length,
+          noRounds: rows.filter((row) => (row.round_done || 0) === 0).length,
         },
       };
     }
@@ -940,6 +946,7 @@
         $('bjp').textContent = fmt.format(payload.summary.bjp);
         $('tmc').textContent = fmt.format(payload.summary.tmc);
         $('progress').textContent = fmt.format(payload.summary.progress);
+        $('noRounds').textContent = fmt.format(payload.summary.noRounds);
         $('updated').textContent = payload.eciUpdated;
         updateDuel(data, payload.summary);
         $('status').textContent = `Loaded ${data.length} constituencies in ${payload.elapsed}s. Next local poll in 10s.`;
