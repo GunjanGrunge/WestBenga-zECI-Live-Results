@@ -1197,7 +1197,8 @@
     // Stop header click from toggling when clicking the input
     $('closeThreshold').addEventListener('click', (e) => e.stopPropagation());
 
-    // Column header click-to-sort    document.querySelectorAll('th.sortable').forEach((th) => {
+    // Column header click-to-sort
+    document.querySelectorAll('th.sortable').forEach((th) => {
       th.addEventListener('click', () => {
         const key = th.dataset.sort;
         if (sortState.key === key) {
