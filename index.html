@@ -343,11 +343,24 @@
       gap: 8px;
     }
 
+    .duel-stats .duel-won-card {
+      grid-column: 1 / -1;
+    }
+
     .duel-stat {
       border: 1px solid #243245;
       border-radius: 8px;
       padding: 10px;
       background: rgba(12, 18, 25, 0.72);
+    }
+
+    .duel-won-card {
+      border-color: rgba(255,255,255,0.12);
+      background: rgba(12, 18, 25, 0.9);
+    }
+
+    .duel-won-card strong {
+      font-size: 30px !important;
     }
 
     .duel-stat strong {
@@ -924,6 +937,7 @@
           </div>
           <div class="duel-big bjp" id="bjpDuelLead">-</div>
           <div class="duel-stats">
+            <div class="duel-stat duel-won-card"><div class="label">🏆 Seats Won</div><strong id="bjpWon" class="bjp">-</strong></div>
             <div class="duel-stat"><div class="label">BJP-led 70%+</div><strong id="bjpHighProb">-</strong></div>
             <div class="duel-stat"><div class="label">BJP-led 70% counted + 70% win</div><strong id="bjpMaxRoundHighProb">-</strong></div>
           </div>
@@ -942,6 +956,7 @@
           </div>
           <div class="duel-big tmc" id="tmcDuelLead">-</div>
           <div class="duel-stats">
+            <div class="duel-stat duel-won-card"><div class="label">🏆 Seats Won</div><strong id="tmcWon" class="tmc">-</strong></div>
             <div class="duel-stat"><div class="label">TMC-led 70%+</div><strong id="tmcHighProb">-</strong></div>
             <div class="duel-stat"><div class="label">TMC-led 70% counted + 70% win</div><strong id="tmcMaxRoundHighProb">-</strong></div>
           </div>
@@ -1136,8 +1151,11 @@
     }
 
     function updateDuel(rows, summary) {
+      const isDeclared = (row) => (row.status || '').toLowerCase().includes('declared');
       const bjpLedRows = rows.filter((row) => isLedBy(row, BJP));
       const tmcLedRows = rows.filter((row) => isLedBy(row, TMC));
+      const bjpWon = bjpLedRows.filter(isDeclared).length;
+      const tmcWon = tmcLedRows.filter(isDeclared).length;
       const bjpLead = bjpLedRows.length;
       const tmcLead = tmcLedRows.length;
       const bjpHigh = bjpLedRows.filter((row) => (row.probability || 0) >= HIGH_PROBABILITY).length;
@@ -1151,6 +1169,8 @@
 
       $('bjpDuelLead').textContent = fmt.format(bjpLead);
       $('tmcDuelLead').textContent = fmt.format(tmcLead);
+      $('bjpWon').textContent = fmt.format(bjpWon);
+      $('tmcWon').textContent = fmt.format(tmcWon);
       $('bjpHighProb').textContent = fmt.format(bjpHigh);
       $('tmcHighProb').textContent = fmt.format(tmcHigh);
       $('bjpMaxRoundHighProb').textContent = fmt.format(bjpMaxHigh);
