@@ -29,5 +29,6 @@ jobs:
           git add results.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh ECI results data"
+          git pull --rebase origin main
           git push origin HEAD:main
           git push origin HEAD:gh-pages
