@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="600">
+  <title>West Bengal ECI Live Results</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0d1117;
+      color: #eef2f7;
+    }
+    body { margin: 0; background: #0d1117; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(13, 17, 23, 0.96);
+      border-bottom: 1px solid #263244;
+      padding: 16px 22px;
+    }
+    h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
+    .sub { color: #9fb0c6; font-size: 13px; margin-top: 5px; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 190px 170px;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    input, select {
+      background: #151b24;
+      border: 1px solid #2f3a4a;
+      color: #eef2f7;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    main { padding: 18px 22px 28px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: #141a23;
+      border: 1px solid #263244;
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .label { color: #9fb0c6; font-size: 12px; }
+    .value { margin-top: 6px; font-size: 24px; font-weight: 750; }
+    .table-wrap { overflow: auto; border: 1px solid #263244; border-radius: 8px; }
+    table { border-collapse: collapse; width: 100%; min-width: 1120px; background: #111821; }
+    th, td {
+      padding: 10px 11px;
+      border-bottom: 1px solid #253042;
+      text-align: left;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    th { position: sticky; top: 115px; background: #17202b; z-index: 3; color: #c9d6e5; }
+    tr:hover td { background: #17202b; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .party { font-weight: 700; }
+    .bjp { color: #ffb36a; }
+    .tmc { color: #75d184; }
+    .other { color: #8fc7ff; }
+    .bar { width: 86px; height: 7px; background: #253042; border-radius: 999px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: #75d184; }
+    .error { color: #ff8f8f; }
+    .muted { color: #9fb0c6; }
+    @media (max-width: 850px) {
+      .toolbar { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+      th { top: 190px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>West Bengal ECI Live Results</h1>
+    <div class="sub">Browser polls official ECI pages every 10s. Page auto-refreshes every 10 min. Probability is a heuristic, not an ECI metric.</div>
+    <div class="toolbar">
+      <input id="search" placeholder="Search constituency">
+      <select id="partyFilter">
+        <option value="">All leading parties</option>
+        <option value="Bharatiya Janata Party">BJP leading</option>
+        <option value="All India Trinamool Congress">TMC leading</option>
+        <option value="other">Other leading</option>
+      </select>
+      <select id="sortBy">
+        <option value="constituency_no">Sort by AC number</option>
+        <option value="margin">Sort by margin</option>
+        <option value="lead_pct">Sort by % lead</option>
+        <option value="probability">Sort by probability</option>
+        <option value="round_left">Sort by rounds left</option>
+      </select>
+    </div>
+  </header>
+  <main>
+    <section class="cards">
+      <div class="card"><div class="label">Known Seats</div><div class="value" id="known">-</div></div>
+      <div class="card"><div class="label">BJP Leading/Won</div><div class="value bjp" id="bjp">-</div></div>
+      <div class="card"><div class="label">TMC Leading/Won</div><div class="value tmc" id="tmc">-</div></div>
+      <div class="card"><div class="label">In Progress</div><div class="value" id="progress">-</div></div>
+      <div class="card"><div class="label">ECI Updated</div><div class="value" id="updated" style="font-size:16px">-</div></div>
+    </section>
+    <div id="status" class="sub">Loading ECI data...</div>
+    <div class="table-wrap" style="margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th>AC</th>
+            <th>Constituency</th>
+            <th class="num">BJP Votes</th>
+            <th class="num">TMC Votes</th>
+            <th>Party In Lead</th>
+            <th class="num">Round Done</th>
+            <th class="num">Round Left</th>
+            <th class="num">% Lead</th>
+            <th class="num">Prob. To Win</th>
+            <th class="num">Margin</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+  <script>
+    const ECI_BASE = 'https://results.eci.gov.in/ResultAcGenMay2026';
+    const STATE_CODE = 'S25';
+    const BJP = 'Bharatiya Janata Party';
+    const TMC = 'All India Trinamool Congress';
+    const POLL_MS = 10000;
+    const DETAIL_CONCURRENCY = 18;
+
+    let data = [];
+    const fmt = new Intl.NumberFormat('en-IN');
+    const $ = (id) => document.getElementById(id);
+
+    function text(node) {
+      return (node?.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function number(value) {
+      const match = String(value || '').match(/-?[\d,]+/);
+      return match ? Number(match[0].replace(/,/g, '')) : 0;
+    }
+
+    function roundPair(value) {
+      const match = String(value || '').match(/(\d+)\s*\/\s*(\d+)/);
+      return match ? [Number(match[1]), Number(match[2])] : [0, 0];
+    }
+
+    async function fetchDoc(url) {
+      const response = await fetch(url + (url.includes('?') ? '&' : '?') + 'ts=' + Date.now(), { cache: 'no-store' });
+      if (!response.ok) throw new Error(`${response.status} ${url}`);
+      const html = await response.text();
+      return new DOMParser().parseFromString(html, 'text/html');
+    }
+
+    function statePageUrls(doc) {
+      const pages = new Set([1]);
+      doc.querySelectorAll(`a[href^="statewise${STATE_CODE}"]`).forEach((link) => {
+        const match = link.getAttribute('href').match(new RegExp(`statewise${STATE_CODE}(\\d+)\\.htm`));
+        if (match) pages.add(Number(match[1]));
+      });
+      return [...pages].sort((a, b) => a - b).map((num) => `${ECI_BASE}/statewise${STATE_CODE}${num}.htm`);
+    }
+
+    function partyFromCell(cell) {
+      return text(cell.querySelector("td[align='left']") || cell);
+    }
+
+    function parseStateDoc(doc) {
+      const rows = [];
+      doc.querySelectorAll('tbody tr').forEach((tr) => {
+        const cells = [...tr.children];
+        if (cells.length < 9) return;
+        const constituencyNo = number(text(cells[1]));
+        if (!constituencyNo) return;
+        const [roundDone, roundTotal] = roundPair(text(cells[7]));
+        rows.push({
+          constituency: text(cells[0]),
+          constituency_no: constituencyNo,
+          leading_candidate: text(cells[2]),
+          leading_party: partyFromCell(cells[3]),
+          trailing_candidate: text(cells[4]),
+          trailing_party: partyFromCell(cells[5]),
+          margin: number(text(cells[6])),
+          round_done: roundDone,
+          round_total: roundTotal,
+          round_left: Math.max(roundTotal - roundDone, 0),
+          status: text(cells[8]),
+        });
+      });
+      return rows;
+    }
+
+    function parseDetailDoc(doc) {
+      const [roundDone, roundTotal] = roundPair(text(doc.body));
+      let bjpVotes = 0;
+      let tmcVotes = 0;
+      let totalVotes = 0;
+      doc.querySelectorAll('tbody tr').forEach((tr) => {
+        const cells = [...tr.children];
+        if (cells.length < 7) return;
+        const party = text(cells[2]);
+        const votes = number(text(cells[5]));
+        totalVotes += votes;
+        if (party === BJP) bjpVotes = votes;
+        if (party === TMC) tmcVotes = votes;
+      });
+      return {
+        round_done: roundDone,
+        round_total: roundTotal,
+        round_left: Math.max(roundTotal - roundDone, 0),
+        bjp_votes: bjpVotes,
+        tmc_votes: tmcVotes,
+        total_votes: totalVotes,
+      };
+    }
+
+    async function mapLimit(items, limit, worker) {
+      const results = new Array(items.length);
+      let index = 0;
+      async function next() {
+        while (index < items.length) {
+          const current = index++;
+          results[current] = await worker(items[current], current);
+        }
+      }
+      await Promise.all(Array.from({ length: limit }, next));
+      return results;
+    }
+
+    function probabilityFor(row) {
+      const totalVotes = Math.max(row.total_votes || 0, (row.bjp_votes || 0) + (row.tmc_votes || 0), 1);
+      if (!row.bjp_votes && !row.tmc_votes) return { lead_pct: 0, probability: 50 };
+      const done = row.round_done || 0;
+      const totalRounds = row.round_total || 0;
+      const progress = totalRounds ? done / totalRounds : 0;
+      const marginVotes = Math.abs((row.bjp_votes || 0) - (row.tmc_votes || 0)) || row.margin || 0;
+      const marginPct = marginVotes / totalVotes * 100;
+      const score = marginPct * 3.8 + progress * 42;
+      const leadPct = (row.margin || 0) / totalVotes * 100;
+      const isFinal = /declared|won/i.test(row.status || '');
+      return {
+        lead_pct: Number(leadPct.toFixed(2)),
+        probability: isFinal ? 99 : Math.max(51, Math.min(98, Math.round(50 + score))),
+      };
+    }
+
+    async function loadResults() {
+      const started = Date.now();
+      const firstDoc = await fetchDoc(`${ECI_BASE}/statewise${STATE_CODE}1.htm`);
+      const pageUrls = statePageUrls(firstDoc);
+      const docs = [firstDoc, ...(await Promise.all(pageUrls.slice(1).map(fetchDoc)))];
+      const byNo = new Map();
+      docs.flatMap(parseStateDoc).forEach((row) => byNo.set(row.constituency_no, row));
+      const rows = [...byNo.values()].sort((a, b) => a.constituency_no - b.constituency_no);
+
+      await mapLimit(rows, DETAIL_CONCURRENCY, async (row) => {
+        row.detail_url = `${ECI_BASE}/Constituencywise${STATE_CODE}${row.constituency_no}.htm`;
+        try {
+          const detail = parseDetailDoc(await fetchDoc(row.detail_url));
+          row.bjp_votes = detail.bjp_votes;
+          row.tmc_votes = detail.tmc_votes;
+          row.total_votes = detail.total_votes;
+          if (detail.round_total) {
+            row.round_done = detail.round_done;
+            row.round_total = detail.round_total;
+            row.round_left = detail.round_left;
+          }
+          row.detail_error = '';
+        } catch (error) {
+          row.bjp_votes = 0;
+          row.tmc_votes = 0;
+          row.total_votes = 0;
+          row.detail_error = error.message;
+        }
+        Object.assign(row, probabilityFor(row));
+      });
+
+      const eciUpdated = text(firstDoc.querySelector('.foot-content span')) || '-';
+      return {
+        rows,
+        eciUpdated,
+        elapsed: ((Date.now() - started) / 1000).toFixed(1),
+        summary: {
+          bjp: rows.filter((row) => row.leading_party === BJP).length,
+          tmc: rows.filter((row) => row.leading_party === TMC).length,
+          progress: rows.filter((row) => /progress/i.test(row.status)).length,
+        },
+      };
+    }
+
+    function partyClass(party) {
+      if ((party || '').includes('Bharatiya Janata')) return 'bjp';
+      if ((party || '').includes('Trinamool')) return 'tmc';
+      return 'other';
+    }
+
+    function render() {
+      const q = $('search').value.trim().toLowerCase();
+      const party = $('partyFilter').value;
+      const sortBy = $('sortBy').value;
+      let rows = data.filter((row) => {
+        const matchesSearch = !q || row.constituency.toLowerCase().includes(q);
+        const matchesParty = !party
+          || row.leading_party === party
+          || (party === 'other' && row.leading_party !== BJP && row.leading_party !== TMC);
+        return matchesSearch && matchesParty;
+      });
+      rows.sort((a, b) => sortBy === 'constituency_no' ? a.constituency_no - b.constituency_no : (b[sortBy] || 0) - (a[sortBy] || 0));
+      $('rows').innerHTML = rows.map((row) => `
+        <tr>
+          <td class="num">${row.constituency_no}</td>
+          <td><a href="${row.detail_url}" target="_blank" style="color:#dbe7f6;text-decoration:none">${row.constituency}</a></td>
+          <td class="num bjp">${fmt.format(row.bjp_votes || 0)}</td>
+          <td class="num tmc">${fmt.format(row.tmc_votes || 0)}</td>
+          <td class="party ${partyClass(row.leading_party)}">${row.leading_party || '-'}</td>
+          <td class="num">${row.round_done}/${row.round_total}</td>
+          <td class="num">${row.round_left}</td>
+          <td class="num">${(row.lead_pct || 0).toFixed(2)}%</td>
+          <td class="num">
+            <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
+              <div class="bar"><span style="width:${row.probability || 0}%"></span></div>
+              ${row.probability || 0}%
+            </div>
+          </td>
+          <td class="num">${fmt.format(row.margin || 0)}</td>
+          <td class="${row.detail_error ? 'error' : 'muted'}">${row.detail_error ? 'Detail fetch issue' : row.status}</td>
+        </tr>`).join('');
+    }
+
+    async function refresh() {
+      try {
+        $('status').textContent = 'Fetching current ECI data...';
+        const payload = await loadResults();
+        data = payload.rows;
+        $('known').textContent = fmt.format(data.length);
+        $('bjp').textContent = fmt.format(payload.summary.bjp);
+        $('tmc').textContent = fmt.format(payload.summary.tmc);
+        $('progress').textContent = fmt.format(payload.summary.progress);
+        $('updated').textContent = payload.eciUpdated;
+        $('status').textContent = `Fetched ${data.length} constituencies in ${payload.elapsed}s from ECI. Next poll in 10s.`;
+        render();
+      } catch (error) {
+        $('status').innerHTML = `<span class="error">Could not load ECI data: ${error.message}</span>`;
+      }
+    }
+
+    ['search', 'partyFilter', 'sortBy'].forEach((id) => $(id).addEventListener('input', render));
+    refresh();
+    setInterval(refresh, POLL_MS);
+  </script>
+</body>
+</html>
