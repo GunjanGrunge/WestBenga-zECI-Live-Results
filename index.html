@@ -127,11 +127,41 @@
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(210px, 1fr) 210px 190px;
+      grid-template-columns: 210px 190px minmax(0,1fr);
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .toolbar-bar {
+      display: flex;
       gap: 10px;
       margin-top: 16px;
       align-items: center;
     }
+
+    .toolbar-search {
+      flex: 1;
+    }
+
+    .filter-toggle-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: #101720;
+      border: 1px solid var(--line-strong);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .filter-toggle-btn:hover { background: #182230; }
+    .filter-toggle-icon { font-size: 11px; transition: transform .2s; }
+    .filter-toggle-btn[aria-expanded="true"] .filter-toggle-icon { transform: rotate(180deg); }
 
     input, select {
       width: 100%;
@@ -683,7 +713,13 @@
       .title-row { display: block; }
       h1 { font-size: 22px; }
       .live-pill { margin-top: 12px; width: max-content; }
-      .toolbar { grid-template-columns: 1fr; }
+      .filter-toggle-btn { display: inline-flex; }
+      .toolbar {
+        grid-template-columns: 1fr;
+        display: none;
+        margin-top: 10px;
+      }
+      .toolbar.open { display: grid; }
       main { padding: 14px; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
       .duel-party,
@@ -695,6 +731,8 @@
       .small-value { font-size: 14px; }
       .status-row { display: block; }
       .legend { justify-content: flex-start; margin-top: 8px; }
+      .close-contests-header { flex-wrap: wrap; gap: 8px; }
+      .close-threshold { order: 3; width: 100%; }
       .table-wrap {
         overflow: visible;
         border: 0;
@@ -775,8 +813,13 @@
           </div>
           <div class="live-pill"><span class="live-dot"></span><span>Live snapshot</span></div>
         </div>
-        <div class="toolbar">
-          <input id="search" placeholder="Search constituency">
+        <div class="toolbar-bar">
+          <input id="search" placeholder="🔍 Search constituency" class="toolbar-search">
+          <button id="filterToggle" class="filter-toggle-btn" aria-expanded="false">
+            <span>Filters &amp; Sort</span><span class="filter-toggle-icon">▼</span>
+          </button>
+        </div>
+        <div class="toolbar" id="toolbarFilters">
           <select id="partyFilter">
             <option value="">All leading parties</option>
             <option value="Bharatiya Janata Party">BJP leading</option>
@@ -815,8 +858,8 @@
             <option value="probability">Sort by probability</option>
             <option value="round_left">Sort by rounds left</option>
           </select>
-        </div>
-      </div>
+        </div><!-- /.toolbar -->
+      </div><!-- /.header-inner -->
     </header>
 
     <main>
@@ -1166,6 +1209,14 @@
         $('status').innerHTML = `<span class="error">Could not load results: ${error.message}</span>`;
       }
     }
+
+    // Mobile filter toggle
+    $('filterToggle').addEventListener('click', () => {
+      const toolbar = $('toolbarFilters');
+      const btn = $('filterToggle');
+      const open = toolbar.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+    });
 
     // Close Contests panel
     function renderCloseContests() {
