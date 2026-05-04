@@ -30,6 +30,24 @@
       color: var(--text);
     }
 
+    :root.light {
+      color-scheme: light;
+      --bg: #f0f4f8;
+      --panel: #ffffff;
+      --panel-2: #e8eef5;
+      --line: #d0dae5;
+      --line-strong: #b0bfcf;
+      --text: #0f1923;
+      --muted: #5a6f84;
+      --bjp: #c96a10;
+      --bjp-soft: rgba(201, 106, 16, 0.12);
+      --tmc: #1f8f4e;
+      --tmc-soft: rgba(31, 143, 78, 0.12);
+      --other: #2878c0;
+      --other-soft: rgba(40, 120, 192, 0.12);
+      --danger: #d93025;
+    }
+
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); }
     a { color: inherit; }
@@ -100,6 +118,24 @@
       margin-top: 7px;
       max-width: 880px;
     }
+
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--line-strong);
+      color: var(--muted);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s, border-color .2s, color .2s;
+    }
+    .theme-toggle-btn:hover { background: var(--line); color: var(--text); }
 
     .pause-btn {
       display: inline-flex;
@@ -741,6 +777,30 @@
       }
     }
 
+    /* ── Light theme overrides for hardcoded dark colours ── */
+    :root.light body { background: var(--bg); }
+    :root.light .page { background: linear-gradient(180deg, rgba(200,220,240,0.4) 0, rgba(240,244,248,0) 310px), var(--bg); }
+    :root.light header { background: rgba(240,244,248,0.96); }
+    :root.light .card { background: #ffffff; }
+    :root.light .duel-party, :root.light .duel-center { background: #ffffff; }
+    :root.light .duel-stat { background: #f4f7fa; border-color: var(--line); }
+    :root.light .duel-won-card { background: #f0f4f8; }
+    :root.light .duel-scale { background: #d0dae5; }
+    :root.light th { background: #e2eaf3; color: #2a3a4d; }
+    :root.light th.sortable:hover { background: #d5e2ee; }
+    :root.light tr:hover td { background: #f4f8fc; }
+    :root.light .table-wrap { background: #ffffff; border-color: var(--line); }
+    :root.light .close-contests { background: #ffffff; }
+    :root.light .close-contests-header:hover { background: #f0f4f8; }
+    :root.light .close-body { border-color: var(--line); }
+    :root.light .close-col + .close-col { border-color: var(--line); }
+    :root.light .close-threshold input { background: var(--panel-2); }
+    :root.light .duel-stat strong, :root.light .value { color: var(--text); }
+    :root.light input, :root.light select { background: #ffffff; color: var(--text); border-color: var(--line-strong); }
+    :root.light .mini-bar { background: #c8d8e8; }
+    :root.light .kicker { color: #4a6175; }
+    :root.light td:first-child { background: #e8f0f8; }
+
     @media (max-width: 1040px) {
       .cards { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
       .duel { grid-template-columns: 1fr; }
@@ -850,6 +910,7 @@
             <div class="sub">Data loads from a local results snapshot refreshed from ECI by GitHub Actions. Browser polling is every 10 seconds; the page refreshes every 2 minutes.</div>
           </div>
           <div class="live-pill"><span class="live-dot" id="liveDot"></span><span>Live snapshot</span></div>
+          <button id="themeToggle" class="theme-toggle-btn" title="Toggle light/dark theme">🌙 Dark</button>
           <button id="pauseBtn" class="pause-btn" aria-pressed="false" title="Pause auto-refresh">⏸ Auto-refresh: On</button>
         </div>
         <div class="toolbar-bar">
@@ -1259,6 +1320,20 @@
         $('status').innerHTML = `<span class="error">Could not load results: ${error.message}</span>`;
       }
     }
+
+    // Theme toggle
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      let light = localStorage.getItem('theme') === 'light';
+      function apply() {
+        root.classList.toggle('light', light);
+        btn.textContent = light ? '🌙 Dark' : '☀️ Light';
+        localStorage.setItem('theme', light ? 'light' : 'dark');
+      }
+      apply();
+      btn.addEventListener('click', () => { light = !light; apply(); });
+    })();
 
     // Mobile filter toggle
     $('filterToggle').addEventListener('click', () => {
