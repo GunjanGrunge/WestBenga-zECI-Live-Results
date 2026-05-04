@@ -2,7 +2,7 @@ name: Update ECI Results JSON
 
 on:
   schedule:
-    - cron: "* * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:

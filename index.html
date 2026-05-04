@@ -649,15 +649,15 @@
           </div>
           <div class="duel-big bjp" id="bjpDuelLead">-</div>
           <div class="duel-stats">
-            <div class="duel-stat"><div class="label">90%+ probability</div><strong id="bjpHighProb">-</strong></div>
-            <div class="duel-stat"><div class="label">Most counted + 90%+</div><strong id="bjpMaxRoundHighProb">-</strong></div>
+            <div class="duel-stat"><div class="label">BJP-led 90%+</div><strong id="bjpHighProb">-</strong></div>
+            <div class="duel-stat"><div class="label">BJP-led most counted + 90%+</div><strong id="bjpMaxRoundHighProb">-</strong></div>
           </div>
         </div>
 
         <div class="duel-center">
           <div class="duel-vs"><span>BJP</span><span>vs</span><span>TMC</span></div>
           <div class="duel-scale" id="duelScale"><span></span><span></span></div>
-          <div class="duel-note" id="duelNote">Waiting for results snapshot.</div>
+          <div class="duel-note" id="duelNote">Other-party-led seats are excluded from BJP/TMC favorable counts.</div>
         </div>
 
         <div class="duel-party">
@@ -667,8 +667,8 @@
           </div>
           <div class="duel-big tmc" id="tmcDuelLead">-</div>
           <div class="duel-stats">
-            <div class="duel-stat"><div class="label">90%+ probability</div><strong id="tmcHighProb">-</strong></div>
-            <div class="duel-stat"><div class="label">Most counted + 90%+</div><strong id="tmcMaxRoundHighProb">-</strong></div>
+            <div class="duel-stat"><div class="label">TMC-led 90%+</div><strong id="tmcHighProb">-</strong></div>
+            <div class="duel-stat"><div class="label">TMC-led most counted + 90%+</div><strong id="tmcMaxRoundHighProb">-</strong></div>
           </div>
         </div>
       </section>
@@ -776,15 +776,21 @@
       return row.round_total ? (row.round_done || 0) / row.round_total : 0;
     }
 
+    function isLedBy(row, party) {
+      return row.leading_party === party;
+    }
+
     function updateDuel(rows, summary) {
-      const bjpLead = summary.bjp || rows.filter((row) => row.leading_party === BJP).length;
-      const tmcLead = summary.tmc || rows.filter((row) => row.leading_party === TMC).length;
-      const bjpHigh = rows.filter((row) => row.leading_party === BJP && (row.probability || 0) >= HIGH_PROBABILITY).length;
-      const tmcHigh = rows.filter((row) => row.leading_party === TMC && (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const bjpLedRows = rows.filter((row) => isLedBy(row, BJP));
+      const tmcLedRows = rows.filter((row) => isLedBy(row, TMC));
+      const bjpLead = bjpLedRows.length;
+      const tmcLead = tmcLedRows.length;
+      const bjpHigh = bjpLedRows.filter((row) => (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const tmcHigh = tmcLedRows.filter((row) => (row.probability || 0) >= HIGH_PROBABILITY).length;
       const maxProgress = rows.reduce((max, row) => Math.max(max, roundProgress(row)), 0);
       const maxRows = rows.filter((row) => Math.abs(roundProgress(row) - maxProgress) < 0.0001);
-      const bjpMaxHigh = maxRows.filter((row) => row.leading_party === BJP && (row.probability || 0) >= HIGH_PROBABILITY).length;
-      const tmcMaxHigh = maxRows.filter((row) => row.leading_party === TMC && (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const bjpMaxHigh = maxRows.filter((row) => isLedBy(row, BJP) && (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const tmcMaxHigh = maxRows.filter((row) => isLedBy(row, TMC) && (row.probability || 0) >= HIGH_PROBABILITY).length;
       const totalTwoParty = Math.max(bjpLead + tmcLead, 1);
       const bjpShare = Math.max(1, Math.round((bjpLead / totalTwoParty) * 100));
       const tmcShare = Math.max(1, 100 - bjpShare);
@@ -797,7 +803,7 @@
       $('tmcMaxRoundHighProb').textContent = fmt.format(tmcMaxHigh);
       $('duelScale').style.setProperty('--bjp-share', `${bjpShare}fr`);
       $('duelScale').style.setProperty('--tmc-share', `${tmcShare}fr`);
-      $('duelNote').textContent = `${fmt.format(maxRows.length)} constituencies are at the highest counted-round progress (${Math.round(maxProgress * 100)}%).`;
+      $('duelNote').textContent = `${fmt.format(maxRows.length)} constituencies are at the highest counted-round progress (${Math.round(maxProgress * 100)}%). Other-party-led seats are excluded from BJP/TMC favorable counts.`;
     }
 
     function render() {
