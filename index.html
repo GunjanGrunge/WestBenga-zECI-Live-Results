@@ -480,6 +480,7 @@
       background: #283648;
       border-radius: 999px;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .mini-bar span {
@@ -499,10 +500,12 @@
     }
 
     .prob .mini-bar {
-      width: 78px;
+      width: 112px;
+      height: 10px;
+      flex: 0 0 112px;
     }
 
-    .prob-bar {
+    .mini-bar .prob-bar {
       display: block;
       width: 100%;
       height: 100%;
@@ -516,6 +519,10 @@
         );
       transition: background 360ms ease;
     }
+
+    .prob-bar.bjp-prob { box-shadow: inset 0 0 0 1px rgba(242, 138, 47, 0.2); }
+    .prob-bar.tmc-prob { box-shadow: inset 0 0 0 1px rgba(53, 184, 107, 0.2); }
+    .prob-bar.other-prob { box-shadow: inset 0 0 0 1px rgba(92, 167, 232, 0.2); }
 
     .muted { color: var(--muted); }
     .error { color: var(--danger); }
@@ -844,11 +851,12 @@
       return row.leading_party === party;
     }
 
-    function probabilityBarStyle(row, probability) {
+    function probabilityBar(row, probability) {
       const key = partyKey(row.leading_party);
       const win = key === 'bjp' ? 'var(--bjp)' : key === 'tmc' ? 'var(--tmc)' : 'var(--other)';
       const rest = key === 'bjp' ? 'var(--tmc)' : key === 'tmc' ? 'var(--bjp)' : '#283648';
-      return `--prob-pct:${probability}%; --prob-win:${win}; --prob-rest:${rest};`;
+      const style = `--prob-pct:${probability}%; --prob-win:${win}; --prob-rest:${rest};`;
+      return `<span class="mini-bar" title="${probability}% ${row.leading_party || 'leading party'} win probability"><span class="prob-bar ${key}-prob" style="${style}"></span></span>`;
     }
 
     function updateDuel(rows, summary) {
@@ -910,7 +918,7 @@
             <td class="num" data-label="Round Done"><span class="round-meter"><span class="mini-bar"><span style="width:${roundPct}%"></span></span>${row.round_done}/${row.round_total}</span></td>
             <td class="num" data-label="Round Left">${row.round_left}</td>
             <td class="num" data-label="% Lead">${(row.lead_pct || 0).toFixed(2)}%</td>
-            <td class="num" data-label="Prob. To Win"><span class="prob"><span class="mini-bar"><span class="prob-bar" style="${probabilityBarStyle(row, probability)}"></span></span>${probability}%</span></td>
+            <td class="num" data-label="Prob. To Win"><span class="prob">${probabilityBar(row, probability)}<strong>${probability}%</strong></span></td>
             <td class="num" data-label="Margin">${fmt.format(row.margin || 0)}</td>
             <td data-label="Status"><span class="status-cell ${row.detail_error ? 'error' : 'muted'}">${row.detail_error ? 'Detail fetch issue' : row.status}</span></td>
           </tr>`;
