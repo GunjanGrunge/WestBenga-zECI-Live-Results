@@ -8,130 +8,567 @@
   <style>
     :root {
       color-scheme: dark;
+      --bg: #0b0f14;
+      --panel: #111821;
+      --panel-2: #151f2a;
+      --line: #263343;
+      --line-strong: #334356;
+      --text: #eef4fb;
+      --muted: #9cadbf;
+      --bjp: #f28a2f;
+      --bjp-soft: rgba(242, 138, 47, 0.16);
+      --tmc: #35b86b;
+      --tmc-soft: rgba(53, 184, 107, 0.15);
+      --other: #5ca7e8;
+      --other-soft: rgba(92, 167, 232, 0.15);
+      --danger: #ff8f8f;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0d1117;
-      color: #eef2f7;
+      background: var(--bg);
+      color: var(--text);
     }
-    body { margin: 0; background: #0d1117; }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); }
+    a { color: inherit; }
+
+    .page {
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(30, 46, 62, 0.48) 0, rgba(11, 15, 20, 0) 310px),
+        var(--bg);
+    }
+
     header {
       position: sticky;
       top: 0;
-      z-index: 5;
-      background: rgba(13, 17, 23, 0.96);
-      border-bottom: 1px solid #263244;
-      padding: 16px 22px;
+      z-index: 10;
+      background: rgba(11, 15, 20, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
     }
-    h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
-    .sub { color: #9fb0c6; font-size: 13px; margin-top: 5px; }
+
+    .header-inner {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px 18px 16px;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .kicker {
+      color: #c8d5e3;
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 5px 0 0;
+      font-size: 25px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 7px;
+      max-width: 880px;
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      padding: 8px 11px;
+      background: var(--panel);
+      color: #d7e3ef;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #56d987;
+      box-shadow: 0 0 0 4px rgba(86, 217, 135, 0.15);
+    }
+
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) 190px 170px;
+      grid-template-columns: minmax(210px, 1fr) 210px 190px;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 16px;
       align-items: center;
     }
+
     input, select {
-      background: #151b24;
-      border: 1px solid #2f3a4a;
-      color: #eef2f7;
-      border-radius: 6px;
-      padding: 10px 12px;
+      width: 100%;
+      background: #101720;
+      border: 1px solid var(--line-strong);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 11px 12px;
       font-size: 14px;
       outline: none;
     }
-    main { padding: 18px 22px 28px; }
+
+    input:focus, select:focus {
+      border-color: #6fa9e5;
+      box-shadow: 0 0 0 3px rgba(111, 169, 229, 0.16);
+    }
+
+    main {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
     .cards {
       display: grid;
-      grid-template-columns: repeat(5, minmax(120px, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(5, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
     }
+
     .card {
-      background: #141a23;
-      border: 1px solid #263244;
+      min-height: 104px;
+      background: rgba(17, 24, 33, 0.92);
+      border: 1px solid var(--line);
       border-radius: 8px;
       padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
-    .label { color: #9fb0c6; font-size: 12px; }
-    .value { margin-top: 6px; font-size: 24px; font-weight: 750; }
-    .table-wrap { overflow: auto; border: 1px solid #263244; border-radius: 8px; }
-    table { border-collapse: collapse; width: 100%; min-width: 1120px; background: #111821; }
-    th, td {
-      padding: 10px 11px;
-      border-bottom: 1px solid #253042;
-      text-align: left;
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .value {
+      margin-top: 11px;
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .small-value {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .party-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      overflow: hidden;
+    }
+
+    .party-logo svg {
+      display: block;
+      width: 26px;
+      height: 26px;
+    }
+
+    .party-logo.bjp-logo { background: var(--bjp-soft); color: var(--bjp); }
+    .party-logo.tmc-logo { background: var(--tmc-soft); color: var(--tmc); }
+    .party-logo.other-logo { background: var(--other-soft); color: var(--other); }
+
+    .bjp { color: var(--bjp); }
+    .tmc { color: var(--tmc); }
+    .other { color: var(--other); }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin: 4px 0 10px;
+      color: var(--muted);
       font-size: 13px;
+    }
+
+    .status-left {
+      min-height: 20px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       white-space: nowrap;
     }
-    th { position: sticky; top: 115px; background: #17202b; z-index: 3; color: #c9d6e5; }
-    tr:hover td { background: #17202b; }
-    .num { text-align: right; font-variant-numeric: tabular-nums; }
-    .party { font-weight: 700; }
-    .bjp { color: #ffb36a; }
-    .tmc { color: #75d184; }
-    .other { color: #8fc7ff; }
-    .bar { width: 86px; height: 7px; background: #253042; border-radius: 999px; overflow: hidden; }
-    .bar span { display: block; height: 100%; background: #75d184; }
-    .error { color: #ff8f8f; }
-    .muted { color: #9fb0c6; }
-    @media (max-width: 850px) {
+
+    .legend i {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1240px;
+      table-layout: fixed;
+    }
+
+    th, td {
+      padding: 12px 11px;
+      border-bottom: 1px solid #223041;
+      text-align: left;
+      font-size: 13px;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th {
+      position: sticky;
+      top: 148px;
+      z-index: 4;
+      background: #182230;
+      color: #cbd8e6;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    tr:hover td { background: #151f2b; }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .const-link {
+      display: block;
+      color: #e4edf7;
+      text-decoration: none;
+      font-weight: 760;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .const-link:hover { text-decoration: underline; }
+
+    .party-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+      font-weight: 780;
+    }
+
+    .party-chip span:last-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .party-chip .party-logo {
+      width: 28px;
+      height: 28px;
+    }
+
+    .party-chip .party-logo svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .vote-pair {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      font-weight: 760;
+      min-width: 0;
+    }
+
+    .round-meter {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .mini-bar {
+      width: 58px;
+      height: 7px;
+      background: #283648;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .mini-bar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #5ca7e8, #72d28f);
+    }
+
+    .prob {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      font-weight: 800;
+      min-width: 0;
+    }
+
+    .prob .mini-bar {
+      width: 78px;
+    }
+
+    .prob .mini-bar span {
+      background: linear-gradient(90deg, #f0c463, #63d989);
+    }
+
+    .muted { color: var(--muted); }
+    .error { color: var(--danger); }
+
+    .status-cell {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-state {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-row td::before {
+      display: none;
+    }
+
+    @media (max-width: 1040px) {
+      .cards { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
+      th { top: 194px; }
+    }
+
+    @media (max-width: 760px) {
+      .header-inner { padding: 16px 14px 14px; }
+      .title-row { display: block; }
+      h1 { font-size: 22px; }
+      .live-pill { margin-top: 12px; width: max-content; }
       .toolbar { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
-      th { top: 190px; }
+      main { padding: 14px; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .card { min-height: 92px; padding: 12px; }
+      .value { font-size: 24px; }
+      .small-value { font-size: 14px; }
+      .status-row { display: block; }
+      .legend { justify-content: flex-start; margin-top: 8px; }
+      .table-wrap {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+      }
+      table, thead, tbody, tr, th, td {
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+      colgroup { display: none; }
+      thead { display: none; }
+      tbody {
+        display: grid;
+        gap: 12px;
+      }
+      tr {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        overflow: hidden;
+      }
+      tr:hover td { background: transparent; }
+      td {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        white-space: normal;
+        padding: 10px 12px;
+        overflow: visible;
+      }
+      td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 760;
+        flex: 0 0 110px;
+      }
+      td:first-child {
+        background: #172230;
+        border-bottom-color: var(--line-strong);
+      }
+      td:first-child::before {
+        content: "AC";
+      }
+      .num { text-align: left; }
+      .vote-pair, .round-meter, .prob { justify-content: flex-start; }
+      .const-link { text-align: right; white-space: normal; }
+      .party-chip {
+        justify-content: flex-end;
+        text-align: right;
+      }
+      .party-chip span:last-child,
+      .status-cell {
+        white-space: normal;
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .cards { grid-template-columns: 1fr; }
+      td { display: grid; grid-template-columns: 104px 1fr; }
+      td::before { flex: none; }
+      .party-chip, .const-link { justify-content: flex-start; text-align: left; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>West Bengal ECI Live Results</h1>
-    <div class="sub">Browser polls local results JSON every 10s. GitHub Actions refreshes it from ECI. Page auto-refreshes every 10 min. Probability is a heuristic, not an ECI metric.</div>
-    <div class="toolbar">
-      <input id="search" placeholder="Search constituency">
-      <select id="partyFilter">
-        <option value="">All leading parties</option>
-        <option value="Bharatiya Janata Party">BJP leading</option>
-        <option value="All India Trinamool Congress">TMC leading</option>
-        <option value="other">Other leading</option>
-      </select>
-      <select id="sortBy">
-        <option value="constituency_no">Sort by AC number</option>
-        <option value="margin">Sort by margin</option>
-        <option value="lead_pct">Sort by % lead</option>
-        <option value="probability">Sort by probability</option>
-        <option value="round_left">Sort by rounds left</option>
-      </select>
-    </div>
-  </header>
-  <main>
-    <section class="cards">
-      <div class="card"><div class="label">Known Seats</div><div class="value" id="known">-</div></div>
-      <div class="card"><div class="label">BJP Leading/Won</div><div class="value bjp" id="bjp">-</div></div>
-      <div class="card"><div class="label">TMC Leading/Won</div><div class="value tmc" id="tmc">-</div></div>
-      <div class="card"><div class="label">In Progress</div><div class="value" id="progress">-</div></div>
-      <div class="card"><div class="label">ECI Updated</div><div class="value" id="updated" style="font-size:16px">-</div></div>
-    </section>
-    <div id="status" class="sub">Loading ECI data...</div>
-    <div class="table-wrap" style="margin-top:10px">
-      <table>
-        <thead>
-          <tr>
-            <th>AC</th>
-            <th>Constituency</th>
-            <th class="num">BJP Votes</th>
-            <th class="num">TMC Votes</th>
-            <th>Party In Lead</th>
-            <th class="num">Round Done</th>
-            <th class="num">Round Left</th>
-            <th class="num">% Lead</th>
-            <th class="num">Prob. To Win</th>
-            <th class="num">Margin</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-    </div>
-  </main>
+  <div class="page">
+    <header>
+      <div class="header-inner">
+        <div class="title-row">
+          <div>
+            <div class="kicker">Assembly Results Dashboard</div>
+            <h1>West Bengal ECI Live Results</h1>
+            <div class="sub">Data loads from a local results snapshot refreshed from ECI by GitHub Actions. Browser polling is every 10 seconds; the page refreshes every 10 minutes.</div>
+          </div>
+          <div class="live-pill"><span class="live-dot"></span><span>Live snapshot</span></div>
+        </div>
+        <div class="toolbar">
+          <input id="search" placeholder="Search constituency">
+          <select id="partyFilter">
+            <option value="">All leading parties</option>
+            <option value="Bharatiya Janata Party">BJP leading</option>
+            <option value="All India Trinamool Congress">TMC leading</option>
+            <option value="other">Other leading</option>
+          </select>
+          <select id="sortBy">
+            <option value="constituency_no">Sort by AC number</option>
+            <option value="margin">Sort by margin</option>
+            <option value="lead_pct">Sort by % lead</option>
+            <option value="probability">Sort by probability</option>
+            <option value="round_left">Sort by rounds left</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="cards" aria-label="Election summary">
+        <div class="card">
+          <div class="card-head"><div class="label">Known Seats</div><span class="party-logo other-logo" aria-hidden="true"></span></div>
+          <div class="value" id="known">-</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="label">BJP Leading/Won</div><span class="party-logo bjp-logo" aria-hidden="true"></span></div>
+          <div class="value bjp" id="bjp">-</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="label">TMC Leading/Won</div><span class="party-logo tmc-logo" aria-hidden="true"></span></div>
+          <div class="value tmc" id="tmc">-</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="label">In Progress</div><span class="party-logo other-logo" aria-hidden="true"></span></div>
+          <div class="value" id="progress">-</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="label">ECI Updated</div><span class="party-logo other-logo" aria-hidden="true"></span></div>
+          <div class="value small-value" id="updated">-</div>
+        </div>
+      </section>
+
+      <div class="status-row">
+        <div id="status" class="status-left">Loading ECI data...</div>
+        <div class="legend" aria-label="Party color legend">
+          <span><i style="background: var(--bjp)"></i>BJP</span>
+          <span><i style="background: var(--tmc)"></i>TMC</span>
+          <span><i style="background: var(--other)"></i>Other</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <colgroup>
+            <col style="width: 64px">
+            <col style="width: 190px">
+            <col style="width: 126px">
+            <col style="width: 126px">
+            <col style="width: 230px">
+            <col style="width: 136px">
+            <col style="width: 104px">
+            <col style="width: 94px">
+            <col style="width: 134px">
+            <col style="width: 112px">
+            <col style="width: 124px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>AC</th>
+              <th>Constituency</th>
+              <th class="num">BJP Votes</th>
+              <th class="num">TMC Votes</th>
+              <th>Party In Lead</th>
+              <th class="num">Round Done</th>
+              <th class="num">Round Left</th>
+              <th class="num">% Lead</th>
+              <th class="num">Prob. To Win</th>
+              <th class="num">Margin</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
   <script>
     const BJP = 'Bharatiya Janata Party';
     const TMC = 'All India Trinamool Congress';
@@ -140,6 +577,16 @@
     let data = [];
     const fmt = new Intl.NumberFormat('en-IN');
     const $ = (id) => document.getElementById(id);
+
+    const logos = {
+      bjp: `<svg viewBox="0 0 64 64" role="img" aria-label="BJP badge"><circle cx="32" cy="32" r="30" fill="currentColor" opacity=".16"/><path d="M31 49c-5-9-4-19 1-29 5 10 6 20-1 29Z" fill="currentColor"/><path d="M28 39c-9-1-15-6-18-14 9 0 16 5 18 14Z" fill="currentColor" opacity=".82"/><path d="M36 39c9-1 15-6 18-14-9 0-16 5-18 14Z" fill="currentColor" opacity=".82"/><path d="M32 43c-8-4-12-11-11-20 7 4 11 11 11 20Z" fill="currentColor" opacity=".62"/><path d="M32 43c8-4 12-11 11-20-7 4-11 11-11 20Z" fill="currentColor" opacity=".62"/><path d="M22 53h20" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>`,
+      tmc: `<svg viewBox="0 0 64 64" role="img" aria-label="TMC badge"><circle cx="32" cy="32" r="30" fill="currentColor" opacity=".15"/><path d="M28 52c1-13 1-24-3-36" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M40 52c-1-11-1-20 2-31" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="22" cy="17" r="7" fill="currentColor"/><circle cx="31" cy="19" r="7" fill="currentColor" opacity=".76"/><circle cx="42" cy="20" r="7" fill="currentColor"/><circle cx="49" cy="27" r="7" fill="currentColor" opacity=".76"/><path d="M17 43c8 0 15 4 20 10-10 1-17-2-20-10Z" fill="currentColor" opacity=".72"/></svg>`,
+      other: `<svg viewBox="0 0 64 64" role="img" aria-label="Other party badge"><circle cx="32" cy="32" r="28" fill="currentColor" opacity=".16"/><path d="M17 35h30M17 24h22M17 46h18" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><circle cx="49" cy="24" r="4" fill="currentColor"/><circle cx="43" cy="46" r="4" fill="currentColor"/></svg>`,
+    };
+
+    document.querySelectorAll('.bjp-logo').forEach((node) => node.innerHTML = logos.bjp);
+    document.querySelectorAll('.tmc-logo').forEach((node) => node.innerHTML = logos.tmc);
+    document.querySelectorAll('.other-logo').forEach((node) => node.innerHTML = logos.other);
 
     async function loadResults() {
       const started = Date.now();
@@ -159,10 +606,20 @@
       };
     }
 
-    function partyClass(party) {
+    function partyKey(party) {
       if ((party || '').includes('Bharatiya Janata')) return 'bjp';
       if ((party || '').includes('Trinamool')) return 'tmc';
       return 'other';
+    }
+
+    function partyLogo(party) {
+      const key = partyKey(party);
+      return `<span class="party-logo ${key}-logo" aria-hidden="true">${logos[key]}</span>`;
+    }
+
+    function pct(value, total) {
+      if (!total) return 0;
+      return Math.max(0, Math.min(100, Math.round((value / total) * 100)));
     }
 
     function render() {
@@ -176,31 +633,38 @@
           || (party === 'other' && row.leading_party !== BJP && row.leading_party !== TMC);
         return matchesSearch && matchesParty;
       });
+
       rows.sort((a, b) => sortBy === 'constituency_no' ? a.constituency_no - b.constituency_no : (b[sortBy] || 0) - (a[sortBy] || 0));
-      $('rows').innerHTML = rows.map((row) => `
-        <tr>
-          <td class="num">${row.constituency_no}</td>
-          <td><a href="${row.detail_url}" target="_blank" style="color:#dbe7f6;text-decoration:none">${row.constituency}</a></td>
-          <td class="num bjp">${fmt.format(row.bjp_votes || 0)}</td>
-          <td class="num tmc">${fmt.format(row.tmc_votes || 0)}</td>
-          <td class="party ${partyClass(row.leading_party)}">${row.leading_party || '-'}</td>
-          <td class="num">${row.round_done}/${row.round_total}</td>
-          <td class="num">${row.round_left}</td>
-          <td class="num">${(row.lead_pct || 0).toFixed(2)}%</td>
-          <td class="num">
-            <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
-              <div class="bar"><span style="width:${row.probability || 0}%"></span></div>
-              ${row.probability || 0}%
-            </div>
-          </td>
-          <td class="num">${fmt.format(row.margin || 0)}</td>
-          <td class="${row.detail_error ? 'error' : 'muted'}">${row.detail_error ? 'Detail fetch issue' : row.status}</td>
-        </tr>`).join('');
+
+      if (!rows.length) {
+        $('rows').innerHTML = `<tr class="empty-row"><td colspan="11"><div class="empty-state">No constituencies match the current filters.</div></td></tr>`;
+        return;
+      }
+
+      $('rows').innerHTML = rows.map((row) => {
+        const key = partyKey(row.leading_party);
+        const roundPct = pct(row.round_done || 0, row.round_total || 0);
+        const probability = row.probability || 0;
+        return `
+          <tr>
+            <td class="num" data-label="AC">${row.constituency_no}</td>
+            <td data-label="Constituency"><a class="const-link" href="${row.detail_url}" target="_blank" rel="noopener">${row.constituency}</a></td>
+            <td class="num" data-label="BJP Votes"><span class="vote-pair bjp">${partyLogo(BJP)}${fmt.format(row.bjp_votes || 0)}</span></td>
+            <td class="num" data-label="TMC Votes"><span class="vote-pair tmc">${partyLogo(TMC)}${fmt.format(row.tmc_votes || 0)}</span></td>
+            <td data-label="Party In Lead"><span class="party-chip ${key}">${partyLogo(row.leading_party)}<span>${row.leading_party || '-'}</span></span></td>
+            <td class="num" data-label="Round Done"><span class="round-meter"><span class="mini-bar"><span style="width:${roundPct}%"></span></span>${row.round_done}/${row.round_total}</span></td>
+            <td class="num" data-label="Round Left">${row.round_left}</td>
+            <td class="num" data-label="% Lead">${(row.lead_pct || 0).toFixed(2)}%</td>
+            <td class="num" data-label="Prob. To Win"><span class="prob"><span class="mini-bar"><span style="width:${probability}%"></span></span>${probability}%</span></td>
+            <td class="num" data-label="Margin">${fmt.format(row.margin || 0)}</td>
+            <td data-label="Status"><span class="status-cell ${row.detail_error ? 'error' : 'muted'}">${row.detail_error ? 'Detail fetch issue' : row.status}</span></td>
+          </tr>`;
+      }).join('');
     }
 
     async function refresh() {
       try {
-        $('status').textContent = 'Fetching current ECI data...';
+        $('status').textContent = 'Loading current results snapshot...';
         const payload = await loadResults();
         data = payload.rows;
         $('known').textContent = fmt.format(data.length);
@@ -211,7 +675,7 @@
         $('status').textContent = `Loaded ${data.length} constituencies in ${payload.elapsed}s. Next local poll in 10s.`;
         render();
       } catch (error) {
-        $('status').innerHTML = `<span class="error">Could not load ECI data: ${error.message}</span>`;
+        $('status').innerHTML = `<span class="error">Could not load results: ${error.message}</span>`;
       }
     }
 
