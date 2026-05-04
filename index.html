@@ -687,6 +687,31 @@
             <option value="All India Trinamool Congress">TMC leading</option>
             <option value="other">Other leading</option>
           </select>
+          <select id="districtFilter">
+            <option value="">All districts</option>
+            <option value="Alipurduar">Alipurduar</option>
+            <option value="Bankura">Bankura</option>
+            <option value="Birbhum">Birbhum</option>
+            <option value="Cooch Behar">Cooch Behar</option>
+            <option value="Dakshin Dinajpur">Dakshin Dinajpur</option>
+            <option value="Darjeeling">Darjeeling</option>
+            <option value="Hooghly">Hooghly</option>
+            <option value="Howrah">Howrah</option>
+            <option value="Jalpaiguri">Jalpaiguri</option>
+            <option value="Jhargram">Jhargram</option>
+            <option value="Kolkata">Kolkata</option>
+            <option value="Malda">Malda</option>
+            <option value="Murshidabad">Murshidabad</option>
+            <option value="Nadia">Nadia</option>
+            <option value="North 24 Parganas">North 24 Parganas</option>
+            <option value="Paschim Bardhaman">Paschim Bardhaman</option>
+            <option value="Paschim Medinipur">Paschim Medinipur</option>
+            <option value="Purba Bardhaman">Purba Bardhaman</option>
+            <option value="Purba Medinipur">Purba Medinipur</option>
+            <option value="Purulia">Purulia</option>
+            <option value="South 24 Parganas">South 24 Parganas</option>
+            <option value="Uttar Dinajpur">Uttar Dinajpur</option>
+          </select>
           <select id="sortBy">
             <option value="constituency_no">Sort by AC number</option>
             <option value="margin">Sort by margin</option>
@@ -804,6 +829,33 @@
   </div>
 
   <script>
+    // AC number → district lookup (WB 2021 delimitation)
+    function districtOf(acNo) {
+      if (acNo <= 9)   return 'Cooch Behar';
+      if (acNo <= 14)  return 'Alipurduar';
+      if (acNo <= 21)  return 'Jalpaiguri';
+      if (acNo <= 27)  return 'Darjeeling';
+      if (acNo <= 36)  return 'Uttar Dinajpur';
+      if (acNo <= 42)  return 'Dakshin Dinajpur';
+      if (acNo <= 54)  return 'Malda';
+      if (acNo <= 74)  return 'Murshidabad';
+      if (acNo <= 93)  return 'Nadia';
+      if (acNo <= 126) return 'North 24 Parganas';
+      if (acNo <= 157) return 'South 24 Parganas';
+      if (acNo <= 168) return 'Kolkata';
+      if (acNo <= 184) return 'Howrah';
+      if (acNo <= 202) return 'Hooghly';
+      if (acNo <= 218) return 'Purba Medinipur';
+      if (acNo === 219 || (acNo >= 223 && acNo <= 236)) return 'Paschim Medinipur';
+      if (acNo >= 220 && acNo <= 222) return 'Jhargram';
+      if (acNo === 237) return 'Jhargram';
+      if (acNo <= 246) return 'Purulia';
+      if (acNo <= 258) return 'Bankura';
+      if (acNo <= 275) return 'Purba Bardhaman';
+      if (acNo <= 283) return 'Paschim Bardhaman';
+      return 'Birbhum';
+    }
+
     const BJP = 'Bharatiya Janata Party';
     const TMC = 'All India Trinamool Congress';
     const POLL_MS = 10000;
@@ -913,13 +965,15 @@
     function render() {
       const q = $('search').value.trim().toLowerCase();
       const party = $('partyFilter').value;
+      const district = $('districtFilter').value;
       const sortBy = $('sortBy').value;
       let rows = data.filter((row) => {
         const matchesSearch = !q || row.constituency.toLowerCase().includes(q);
         const matchesParty = !party
           || row.leading_party === party
           || (party === 'other' && row.leading_party !== BJP && row.leading_party !== TMC);
-        return matchesSearch && matchesParty;
+        const matchesDistrict = !district || districtOf(row.constituency_no) === district;
+        return matchesSearch && matchesParty && matchesDistrict;
       });
 
       rows.sort((a, b) => sortBy === 'constituency_no' ? a.constituency_no - b.constituency_no : (b[sortBy] || 0) - (a[sortBy] || 0));
@@ -969,7 +1023,7 @@
       }
     }
 
-    ['search', 'partyFilter', 'sortBy'].forEach((id) => $(id).addEventListener('input', render));
+    ['search', 'partyFilter', 'districtFilter', 'sortBy'].forEach((id) => $(id).addEventListener('input', render));
     refresh();
     setInterval(refresh, POLL_MS);
   </script>
