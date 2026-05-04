@@ -395,6 +395,19 @@
       background: rgba(12, 18, 25, 0.9);
     }
 
+    .duel-won-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .vote-share {
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0.75;
+    }
+
     .duel-won-card strong {
       font-size: 30px !important;
     }
@@ -998,7 +1011,13 @@
           </div>
           <div class="duel-big bjp" id="bjpDuelLead">-</div>
           <div class="duel-stats">
-            <div class="duel-stat duel-won-card"><div class="label">🪑 Seats Won</div><strong id="bjpWon" class="bjp">-</strong></div>
+            <div class="duel-stat duel-won-card">
+              <div class="label">🪑 Seats Won</div>
+              <div class="duel-won-row">
+                <strong id="bjpWon" class="bjp">-</strong>
+                <span class="vote-share bjp" id="bjpVoteShare"></span>
+              </div>
+            </div>
             <div class="duel-stat"><div class="label">BJP-led 70%+</div><strong id="bjpHighProb">-</strong></div>
             <div class="duel-stat"><div class="label">BJP-led 70% counted + 70% win</div><strong id="bjpMaxRoundHighProb">-</strong></div>
           </div>
@@ -1017,7 +1036,13 @@
           </div>
           <div class="duel-big tmc" id="tmcDuelLead">-</div>
           <div class="duel-stats">
-            <div class="duel-stat duel-won-card"><div class="label">🪑 Seats Won</div><strong id="tmcWon" class="tmc">-</strong></div>
+            <div class="duel-stat duel-won-card">
+              <div class="label">🪑 Seats Won</div>
+              <div class="duel-won-row">
+                <strong id="tmcWon" class="tmc">-</strong>
+                <span class="vote-share tmc" id="tmcVoteShare"></span>
+              </div>
+            </div>
             <div class="duel-stat"><div class="label">TMC-led 70%+</div><strong id="tmcHighProb">-</strong></div>
             <div class="duel-stat"><div class="label">TMC-led 70% counted + 70% win</div><strong id="tmcMaxRoundHighProb">-</strong></div>
           </div>
@@ -1217,6 +1242,13 @@
       const tmcLedRows = rows.filter((row) => isLedBy(row, TMC));
       const bjpWon = bjpLedRows.filter(isDeclared).length;
       const tmcWon = tmcLedRows.filter(isDeclared).length;
+
+      // Vote share across all rows that have vote data
+      const totalVotes = rows.reduce((s, r) => s + (r.total_votes || 0), 0);
+      const bjpTotalVotes = rows.reduce((s, r) => s + (r.bjp_votes || 0), 0);
+      const tmcTotalVotes = rows.reduce((s, r) => s + (r.tmc_votes || 0), 0);
+      const bjpVotePct = totalVotes > 0 ? (bjpTotalVotes / totalVotes * 100).toFixed(1) : null;
+      const tmcVotePct = totalVotes > 0 ? (tmcTotalVotes / totalVotes * 100).toFixed(1) : null;
       const bjpLead = bjpLedRows.length;
       const tmcLead = tmcLedRows.length;
       const bjpHigh = bjpLedRows.filter((row) => (row.probability || 0) >= HIGH_PROBABILITY).length;
@@ -1232,6 +1264,8 @@
       $('tmcDuelLead').textContent = fmt.format(tmcLead);
       $('bjpWon').textContent = fmt.format(bjpWon);
       $('tmcWon').textContent = fmt.format(tmcWon);
+      $('bjpVoteShare').textContent = bjpVotePct !== null ? `${bjpVotePct}% vote share` : '';
+      $('tmcVoteShare').textContent = tmcVotePct !== null ? `${tmcVotePct}% vote share` : '';
       $('bjpHighProb').textContent = fmt.format(bjpHigh);
       $('tmcHighProb').textContent = fmt.format(tmcHigh);
       $('bjpMaxRoundHighProb').textContent = fmt.format(bjpMaxHigh);
