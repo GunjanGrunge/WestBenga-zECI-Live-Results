@@ -22,7 +22,7 @@ STATE_CODE = os.environ.get("ECI_STATE_CODE", "S25")
 PORT = int(os.environ.get("PORT", "8000"))
 
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "10"))
-PAGE_REFRESH_SECONDS = int(os.environ.get("PAGE_REFRESH_SECONDS", "600"))
+PAGE_REFRESH_SECONDS = int(os.environ.get("PAGE_REFRESH_SECONDS", "120"))
 STATE_CACHE_SECONDS = int(os.environ.get("STATE_CACHE_SECONDS", "10"))
 DETAIL_CACHE_SECONDS = int(os.environ.get("DETAIL_CACHE_SECONDS", "60"))
 DETAIL_WORKERS = int(os.environ.get("DETAIL_WORKERS", "18"))

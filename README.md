@@ -17,7 +17,7 @@ Then open `http://127.0.0.1:8000`.
 
 ## Notes
 
-- The dashboard polls every 10 seconds and the page auto-refreshes every 10 minutes.
+- The dashboard polls every 10 seconds and the page auto-refreshes every 2 minutes.
 - On GitHub Pages, the browser polls the local `results.json`; live ECI scraping happens in GitHub Actions because ECI blocks browser-origin fetches with HTTP 403.
 - Win probability is a local heuristic from margin, vote totals, and counting progress. It is not an ECI-provided value.
 - Official ECI source: `https://results.eci.gov.in/ResultAcGenMay2026`

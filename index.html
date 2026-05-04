@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="600">
+  <meta http-equiv="refresh" content="120">
   <title>West Bengal ECI Live Results</title>
   <style>
     :root {
@@ -205,6 +205,115 @@
     .tmc { color: var(--tmc); }
     .other { color: var(--other); }
 
+    .duel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 0.7fr) minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+      margin: 0 0 14px;
+    }
+
+    .duel-party,
+    .duel-center {
+      background: rgba(17, 24, 33, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .duel-party {
+      display: grid;
+      gap: 12px;
+    }
+
+    .duel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .duel-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-weight: 850;
+      font-size: 18px;
+    }
+
+    .duel-name span:last-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .duel-big {
+      font-size: 42px;
+      line-height: 0.95;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .duel-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .duel-stat {
+      border: 1px solid #243245;
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(12, 18, 25, 0.72);
+    }
+
+    .duel-stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 21px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .duel-center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .duel-vs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #dce7f3;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .duel-scale {
+      display: grid;
+      grid-template-columns: var(--bjp-share, 50fr) var(--tmc-share, 50fr);
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #263343;
+    }
+
+    .duel-scale span:first-child { background: var(--bjp); }
+    .duel-scale span:last-child { background: var(--tmc); }
+
+    .duel-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
     .status-row {
       display: flex;
       justify-content: space-between;
@@ -389,6 +498,7 @@
 
     @media (max-width: 1040px) {
       .cards { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
+      .duel { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 760px) {
@@ -399,6 +509,10 @@
       .toolbar { grid-template-columns: 1fr; }
       main { padding: 14px; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .duel-party,
+      .duel-center { padding: 12px; }
+      .duel-big { font-size: 34px; }
+      .duel-stats { grid-template-columns: 1fr; }
       .card { min-height: 92px; padding: 12px; }
       .value { font-size: 24px; }
       .small-value { font-size: 14px; }
@@ -480,7 +594,7 @@
           <div>
             <div class="kicker">Assembly Results Dashboard</div>
             <h1>West Bengal ECI Live Results</h1>
-            <div class="sub">Data loads from a local results snapshot refreshed from ECI by GitHub Actions. Browser polling is every 10 seconds; the page refreshes every 10 minutes.</div>
+            <div class="sub">Data loads from a local results snapshot refreshed from ECI by GitHub Actions. Browser polling is every 10 seconds; the page refreshes every 2 minutes.</div>
           </div>
           <div class="live-pill"><span class="live-dot"></span><span>Live snapshot</span></div>
         </div>
@@ -524,6 +638,38 @@
         <div class="card">
           <div class="card-head"><div class="label">ECI Updated</div><span class="party-logo other-logo" aria-hidden="true"></span></div>
           <div class="value small-value" id="updated">-</div>
+        </div>
+      </section>
+
+      <section class="duel" aria-label="BJP versus TMC comparison">
+        <div class="duel-party">
+          <div class="duel-title">
+            <div class="duel-name bjp"><span class="party-logo bjp-logo" aria-hidden="true"></span><span>BJP</span></div>
+            <div class="label">Constituencies</div>
+          </div>
+          <div class="duel-big bjp" id="bjpDuelLead">-</div>
+          <div class="duel-stats">
+            <div class="duel-stat"><div class="label">90%+ probability</div><strong id="bjpHighProb">-</strong></div>
+            <div class="duel-stat"><div class="label">Most counted + 90%+</div><strong id="bjpMaxRoundHighProb">-</strong></div>
+          </div>
+        </div>
+
+        <div class="duel-center">
+          <div class="duel-vs"><span>BJP</span><span>vs</span><span>TMC</span></div>
+          <div class="duel-scale" id="duelScale"><span></span><span></span></div>
+          <div class="duel-note" id="duelNote">Waiting for results snapshot.</div>
+        </div>
+
+        <div class="duel-party">
+          <div class="duel-title">
+            <div class="duel-name tmc"><span class="party-logo tmc-logo" aria-hidden="true"></span><span>TMC</span></div>
+            <div class="label">Constituencies</div>
+          </div>
+          <div class="duel-big tmc" id="tmcDuelLead">-</div>
+          <div class="duel-stats">
+            <div class="duel-stat"><div class="label">90%+ probability</div><strong id="tmcHighProb">-</strong></div>
+            <div class="duel-stat"><div class="label">Most counted + 90%+</div><strong id="tmcMaxRoundHighProb">-</strong></div>
+          </div>
         </div>
       </section>
 
@@ -576,6 +722,7 @@
     const BJP = 'Bharatiya Janata Party';
     const TMC = 'All India Trinamool Congress';
     const POLL_MS = 10000;
+    const HIGH_PROBABILITY = 90;
 
     let data = [];
     const fmt = new Intl.NumberFormat('en-IN');
@@ -623,6 +770,34 @@
     function pct(value, total) {
       if (!total) return 0;
       return Math.max(0, Math.min(100, Math.round((value / total) * 100)));
+    }
+
+    function roundProgress(row) {
+      return row.round_total ? (row.round_done || 0) / row.round_total : 0;
+    }
+
+    function updateDuel(rows, summary) {
+      const bjpLead = summary.bjp || rows.filter((row) => row.leading_party === BJP).length;
+      const tmcLead = summary.tmc || rows.filter((row) => row.leading_party === TMC).length;
+      const bjpHigh = rows.filter((row) => row.leading_party === BJP && (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const tmcHigh = rows.filter((row) => row.leading_party === TMC && (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const maxProgress = rows.reduce((max, row) => Math.max(max, roundProgress(row)), 0);
+      const maxRows = rows.filter((row) => Math.abs(roundProgress(row) - maxProgress) < 0.0001);
+      const bjpMaxHigh = maxRows.filter((row) => row.leading_party === BJP && (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const tmcMaxHigh = maxRows.filter((row) => row.leading_party === TMC && (row.probability || 0) >= HIGH_PROBABILITY).length;
+      const totalTwoParty = Math.max(bjpLead + tmcLead, 1);
+      const bjpShare = Math.max(1, Math.round((bjpLead / totalTwoParty) * 100));
+      const tmcShare = Math.max(1, 100 - bjpShare);
+
+      $('bjpDuelLead').textContent = fmt.format(bjpLead);
+      $('tmcDuelLead').textContent = fmt.format(tmcLead);
+      $('bjpHighProb').textContent = fmt.format(bjpHigh);
+      $('tmcHighProb').textContent = fmt.format(tmcHigh);
+      $('bjpMaxRoundHighProb').textContent = fmt.format(bjpMaxHigh);
+      $('tmcMaxRoundHighProb').textContent = fmt.format(tmcMaxHigh);
+      $('duelScale').style.setProperty('--bjp-share', `${bjpShare}fr`);
+      $('duelScale').style.setProperty('--tmc-share', `${tmcShare}fr`);
+      $('duelNote').textContent = `${fmt.format(maxRows.length)} constituencies are at the highest counted-round progress (${Math.round(maxProgress * 100)}%).`;
     }
 
     function render() {
@@ -675,6 +850,7 @@
         $('tmc').textContent = fmt.format(payload.summary.tmc);
         $('progress').textContent = fmt.format(payload.summary.progress);
         $('updated').textContent = payload.eciUpdated;
+        updateDuel(data, payload.summary);
         $('status').textContent = `Loaded ${data.length} constituencies in ${payload.elapsed}s. Next local poll in 10s.`;
         render();
       } catch (error) {
