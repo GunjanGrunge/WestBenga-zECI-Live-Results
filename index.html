@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="120">
+  <!-- auto-refresh handled by JS so the pause toggle can suppress it -->
   <title>West Bengal ECI Live Results</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,6 +100,31 @@
       margin-top: 7px;
       max-width: 880px;
     }
+
+    .pause-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(86,217,135,0.12);
+      border: 1px solid rgba(86,217,135,0.3);
+      color: #56d987;
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s, border-color .2s, color .2s;
+      margin-left: 10px;
+    }
+    .pause-btn:hover { background: rgba(86,217,135,0.2); }
+    .pause-btn.paused {
+      background: rgba(255,90,90,0.1);
+      border-color: rgba(255,90,90,0.3);
+      color: #ff6b6b;
+    }
+    .pause-btn.paused:hover { background: rgba(255,90,90,0.18); }
 
     .live-pill {
       display: inline-flex;
@@ -811,7 +836,8 @@
             <h1><span class="bjp-title">West Bengal</span> <span class="eci-title">ECI</span> Live Results</h1>
             <div class="sub">Data loads from a local results snapshot refreshed from ECI by GitHub Actions. Browser polling is every 10 seconds; the page refreshes every 2 minutes.</div>
           </div>
-          <div class="live-pill"><span class="live-dot"></span><span>Live snapshot</span></div>
+          <div class="live-pill"><span class="live-dot" id="liveDot"></span><span>Live snapshot</span></div>
+          <button id="pauseBtn" class="pause-btn" aria-pressed="false" title="Pause auto-refresh">⏸ Auto-refresh: On</button>
         </div>
         <div class="toolbar-bar">
           <input id="search" placeholder="🔍 Search constituency" class="toolbar-search">
@@ -1026,6 +1052,10 @@
     const BJP = 'Bharatiya Janata Party';
     const TMC = 'All India Trinamool Congress';
     const POLL_MS = 10000;
+    const PAGE_RELOAD_MS = 120000;
+    let paused = localStorage.getItem('autoRefreshPaused') === 'true';
+    let pollTimer = null;
+    let reloadTimer = null;
     const HIGH_PROBABILITY = 70;
     const HIGH_COUNTED_PROGRESS = 0.7;
 
@@ -1264,8 +1294,37 @@
     });
 
     ['search', 'partyFilter', 'districtFilter', 'sortBy'].forEach((id) => $(id).addEventListener('input', render));
+
+    function applyPauseState() {
+      const btn = $('pauseBtn');
+      const dot = $('liveDot');
+      if (paused) {
+        btn.textContent = '▶ Auto-refresh: Off';
+        btn.classList.add('paused');
+        btn.setAttribute('aria-pressed', 'true');
+        dot.style.animationPlayState = 'paused';
+        dot.style.opacity = '0.3';
+        clearInterval(pollTimer); pollTimer = null;
+        clearTimeout(reloadTimer); reloadTimer = null;
+      } else {
+        btn.textContent = '⏸ Auto-refresh: On';
+        btn.classList.remove('paused');
+        btn.setAttribute('aria-pressed', 'false');
+        dot.style.animationPlayState = '';
+        dot.style.opacity = '';
+        if (!pollTimer) pollTimer = setInterval(refresh, POLL_MS);
+        if (!reloadTimer) reloadTimer = setTimeout(() => location.reload(), PAGE_RELOAD_MS);
+      }
+      localStorage.setItem('autoRefreshPaused', paused);
+    }
+
+    $('pauseBtn').addEventListener('click', () => {
+      paused = !paused;
+      applyPauseState();
+    });
+
     refresh();
-    setInterval(refresh, POLL_MS);
+    applyPauseState();
   </script>
 </body>
 </html>
