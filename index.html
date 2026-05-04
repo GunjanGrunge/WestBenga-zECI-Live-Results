@@ -821,6 +821,16 @@
     document.querySelectorAll('.tmc-logo').forEach((node) => node.innerHTML = logos.tmc);
     document.querySelectorAll('.other-logo').forEach((node) => node.innerHTML = logos.other);
 
+    function formatUpdated(str) {
+      // Convert "HH:MM AM/PM On DD/MM/YYYY" → "HH:MM AM/PM On Dth Month YYYY"
+      return str.replace(/(\d{2})\/(\d{2})\/(\d{4})/, (_, dd, mm, yyyy) => {
+        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const d = parseInt(dd, 10);
+        const suffix = d === 1 || d === 21 || d === 31 ? 'st' : d === 2 || d === 22 ? 'nd' : d === 3 || d === 23 ? 'rd' : 'th';
+        return `${d}${suffix} ${months[parseInt(mm, 10) - 1]} ${yyyy}`;
+      });
+    }
+
     async function loadResults() {
       const started = Date.now();
       const response = await fetch('results.json?ts=' + Date.now(), { cache: 'no-store' });
@@ -829,7 +839,7 @@
       const rows = payload.rows || [];
       return {
         rows,
-        eciUpdated: payload.last_updated || payload.fetched_at || '-',
+        eciUpdated: formatUpdated(payload.last_updated || payload.fetched_at || '-'),
         elapsed: ((Date.now() - started) / 1000).toFixed(1),
         summary: {
           bjp: payload.summary?.bjp_leading_or_won || rows.filter((row) => row.leading_party === BJP).length,
