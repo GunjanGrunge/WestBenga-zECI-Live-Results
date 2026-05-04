@@ -792,27 +792,58 @@
 
     /* ── Light theme overrides for hardcoded dark colours ── */
     :root.light body { background: var(--bg); }
-    :root.light .page { background: linear-gradient(180deg, rgba(200,220,240,0.4) 0, rgba(240,244,248,0) 310px), var(--bg); }
-    :root.light header { background: rgba(240,244,248,0.96); }
-    :root.light .card { background: #ffffff; }
-    :root.light .duel-party, :root.light .duel-center { background: #ffffff; }
-    :root.light .duel-stat { background: #f4f7fa; border-color: var(--line); }
-    :root.light .duel-won-card { background: #f0f4f8; }
-    :root.light .duel-scale { background: #d0dae5; }
-    :root.light th { background: #e2eaf3; color: #2a3a4d; }
-    :root.light th.sortable:hover { background: #d5e2ee; }
-    :root.light tr:hover td { background: #f4f8fc; }
-    :root.light .table-wrap { background: #ffffff; border-color: var(--line); }
-    :root.light .close-contests { background: #ffffff; }
-    :root.light .close-contests-header:hover { background: #f0f4f8; }
-    :root.light .close-body { border-color: var(--line); }
-    :root.light .close-col + .close-col { border-color: var(--line); }
-    :root.light .close-threshold input { background: var(--panel-2); }
-    :root.light .duel-stat strong, :root.light .value { color: var(--text); }
+    :root.light .page {
+      background: linear-gradient(180deg, rgba(200,220,240,0.35) 0, rgba(240,244,248,0) 310px), var(--bg);
+    }
+    /* Header */
+    :root.light header { background: rgba(240,244,248,0.96); border-bottom-color: var(--line); }
+    :root.light .kicker { color: #3d5266; }
+    :root.light .eci-title { color: #1a2e42; text-shadow: none; }
+    :root.light .sub { color: var(--muted); }
+    :root.light .live-pill { color: #2a3e52; background: #e8f0f8; border-color: var(--line-strong); }
+    /* Filter button */
+    :root.light .filter-toggle-btn { background: #e8f0f8; border-color: var(--line-strong); color: var(--text); }
+    :root.light .filter-toggle-btn:hover { background: #dce8f4; }
+    /* Inputs */
     :root.light input, :root.light select { background: #ffffff; color: var(--text); border-color: var(--line-strong); }
-    :root.light .mini-bar { background: #c8d8e8; }
-    :root.light .kicker { color: #4a6175; }
-    :root.light td:first-child { background: #e8f0f8; }
+    :root.light input:focus, :root.light select:focus { border-color: #3a7abf; box-shadow: 0 0 0 3px rgba(58,122,191,0.15); }
+    /* Cards */
+    :root.light .card { background: #ffffff; border-color: var(--line); }
+    :root.light .value { color: var(--text); }
+    :root.light .small-value { color: var(--text); }
+    /* Duel panels */
+    :root.light .duel-party,
+    :root.light .duel-center { background: #ffffff; border-color: var(--line); }
+    :root.light .duel-stat { background: #f4f8fc; border-color: var(--line); }
+    :root.light .duel-stat strong { color: var(--text); }
+    :root.light .duel-won-card { background: #edf4fb; border-color: var(--line-strong); }
+    :root.light .duel-vs { color: #2a3e52; }
+    :root.light .duel-scale { background: #c8d8e8; }
+    /* Table */
+    :root.light .table-wrap { background: #ffffff; border-color: var(--line); }
+    :root.light th { background: #dce8f4; color: #1a2e42; border-bottom: 1px solid var(--line-strong); }
+    :root.light th.sortable:hover { background: #cddff0; }
+    :root.light td { border-bottom-color: var(--line); color: var(--text); }
+    :root.light tr:hover td { background: #f0f6fc; }
+    :root.light td:first-child { background: #e4eef8; border-bottom-color: var(--line-strong); }
+    :root.light .const-link { color: #0f2033; }
+    :root.light .ac-cell { color: #1a2e42; }
+    :root.light .party-chip { color: var(--text); }
+    /* Mini bars */
+    :root.light .mini-bar { background: #c5d5e5; border-color: rgba(0,0,0,0.08); }
+    :root.light .mini-bar span { background: linear-gradient(90deg, #3a7abf, #2e9e62); }
+    :root.light .round-meter .mini-bar span { background: #1ca830; box-shadow: 0 0 8px rgba(28,168,48,0.3); }
+    /* Close contests */
+    :root.light .close-contests { background: #ffffff; border-color: var(--line); }
+    :root.light .close-contests-header:hover { background: #f0f6fc; }
+    :root.light .close-body { border-top-color: var(--line); }
+    :root.light .close-col + .close-col { border-left-color: var(--line); }
+    :root.light .close-threshold input { background: #f0f6fc; border-color: var(--line-strong); color: var(--text); }
+    :root.light .close-row { border-bottom-color: var(--line); }
+    /* Pause btn in light mode */
+    :root.light .pause-btn { background: rgba(28,168,48,0.1); border-color: rgba(28,168,48,0.35); color: #1a7a30; }
+    :root.light .pause-btn.paused { background: rgba(200,40,40,0.08); border-color: rgba(200,40,40,0.3); color: #b02020; }
+    :root.light .party-logo { border-color: rgba(0,0,0,0.1); }
 
     @media (max-width: 1040px) {
       .cards { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
