@@ -266,13 +266,11 @@
     }
 
     th {
-      position: sticky;
-      top: 148px;
-      z-index: 4;
       background: #182230;
       color: #cbd8e6;
       font-size: 12px;
       font-weight: 800;
+      height: 48px;
     }
 
     tr:hover td { background: #151f2b; }
@@ -292,6 +290,11 @@
     }
 
     .const-link:hover { text-decoration: underline; }
+
+    .ac-cell {
+      font-weight: 800;
+      color: #dbe7f5;
+    }
 
     .party-chip {
       display: inline-flex;
@@ -386,7 +389,6 @@
 
     @media (max-width: 1040px) {
       .cards { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
-      th { top: 194px; }
     }
 
     @media (max-width: 760px) {
@@ -443,6 +445,7 @@
       td:first-child {
         background: #172230;
         border-bottom-color: var(--line-strong);
+        font-size: 15px;
       }
       td:first-child::before {
         content: "AC";
@@ -536,17 +539,17 @@
       <div class="table-wrap">
         <table>
           <colgroup>
-            <col style="width: 64px">
-            <col style="width: 190px">
+            <col style="width: 74px">
+            <col style="width: 210px">
             <col style="width: 126px">
             <col style="width: 126px">
-            <col style="width: 230px">
+            <col style="width: 220px">
             <col style="width: 136px">
             <col style="width: 104px">
             <col style="width: 94px">
             <col style="width: 134px">
             <col style="width: 112px">
-            <col style="width: 124px">
+            <col style="width: 118px">
           </colgroup>
           <thead>
             <tr>
@@ -647,7 +650,7 @@
         const probability = row.probability || 0;
         return `
           <tr>
-            <td class="num" data-label="AC">${row.constituency_no}</td>
+            <td class="num ac-cell" data-label="AC">${row.constituency_no}</td>
             <td data-label="Constituency"><a class="const-link" href="${row.detail_url}" target="_blank" rel="noopener">${row.constituency}</a></td>
             <td class="num" data-label="BJP Votes"><span class="vote-pair bjp">${partyLogo(BJP)}${fmt.format(row.bjp_votes || 0)}</span></td>
             <td class="num" data-label="TMC Votes"><span class="vote-pair tmc">${partyLogo(TMC)}${fmt.format(row.tmc_votes || 0)}</span></td>
