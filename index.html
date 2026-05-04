@@ -83,30 +83,11 @@
     }
 
     .eci-title {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 1px;
+      display: inline-block;
+      color: #f7fbff;
       white-space: nowrap;
-    }
-
-    .eci-title span {
       -webkit-text-fill-color: currentColor;
-      text-shadow: 0 0 18px rgba(79, 149, 222, 0.22);
-    }
-
-    .eci-title .eci-e { color: #ff9933; }
-    .eci-title .eci-c { color: #f7fbff; }
-    .eci-title .eci-i { color: #138808; }
-
-    .eci-title::after {
-      content: "";
-      width: 8px;
-      height: 8px;
-      margin-left: 3px;
-      border-radius: 999px;
-      background: #1f5faa;
-      box-shadow: 0 0 0 3px rgba(31, 95, 170, 0.2);
-      transform: translateY(-1px);
+      text-shadow: 0 0 18px rgba(247, 251, 255, 0.16);
     }
 
     .sub {
@@ -521,10 +502,19 @@
       width: 78px;
     }
 
-    .prob .mini-bar span {
-      background: linear-gradient(90deg, #f0c463, #63d989);
-      background-size: 160% 100%;
-      animation: barShine 2.8s linear infinite;
+    .prob-bar {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(
+          90deg,
+          var(--prob-win) 0%,
+          var(--prob-win) var(--prob-pct),
+          var(--prob-rest) var(--prob-pct),
+          var(--prob-rest) 100%
+        );
+      transition: background 360ms ease;
     }
 
     .muted { color: var(--muted); }
@@ -554,11 +544,6 @@
     @keyframes riseIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes barShine {
-      0% { background-position: 0 0; }
-      100% { background-position: 160% 0; }
     }
 
     @keyframes scaleGlow {
@@ -672,7 +657,7 @@
         <div class="title-row">
           <div>
             <div class="kicker">Assembly Results Dashboard</div>
-            <h1><span class="bjp-title">West Bengal</span> <span class="eci-title" aria-label="ECI"><span class="eci-e">E</span><span class="eci-c">C</span><span class="eci-i">I</span></span> Live Results</h1>
+            <h1><span class="bjp-title">West Bengal</span> <span class="eci-title">ECI</span> Live Results</h1>
             <div class="sub">Data loads from a local results snapshot refreshed from ECI by GitHub Actions. Browser polling is every 10 seconds; the page refreshes every 2 minutes.</div>
           </div>
           <div class="live-pill"><span class="live-dot"></span><span>Live snapshot</span></div>
@@ -859,6 +844,13 @@
       return row.leading_party === party;
     }
 
+    function probabilityBarStyle(row, probability) {
+      const key = partyKey(row.leading_party);
+      const win = key === 'bjp' ? 'var(--bjp)' : key === 'tmc' ? 'var(--tmc)' : 'var(--other)';
+      const rest = key === 'bjp' ? 'var(--tmc)' : key === 'tmc' ? 'var(--bjp)' : '#283648';
+      return `--prob-pct:${probability}%; --prob-win:${win}; --prob-rest:${rest};`;
+    }
+
     function updateDuel(rows, summary) {
       const bjpLedRows = rows.filter((row) => isLedBy(row, BJP));
       const tmcLedRows = rows.filter((row) => isLedBy(row, TMC));
@@ -918,7 +910,7 @@
             <td class="num" data-label="Round Done"><span class="round-meter"><span class="mini-bar"><span style="width:${roundPct}%"></span></span>${row.round_done}/${row.round_total}</span></td>
             <td class="num" data-label="Round Left">${row.round_left}</td>
             <td class="num" data-label="% Lead">${(row.lead_pct || 0).toFixed(2)}%</td>
-            <td class="num" data-label="Prob. To Win"><span class="prob"><span class="mini-bar"><span style="width:${probability}%"></span></span>${probability}%</span></td>
+            <td class="num" data-label="Prob. To Win"><span class="prob"><span class="mini-bar"><span class="prob-bar" style="${probabilityBarStyle(row, probability)}"></span></span>${probability}%</span></td>
             <td class="num" data-label="Margin">${fmt.format(row.margin || 0)}</td>
             <td data-label="Status"><span class="status-cell ${row.detail_error ? 'error' : 'muted'}">${row.detail_error ? 'Detail fetch issue' : row.status}</span></td>
           </tr>`;
