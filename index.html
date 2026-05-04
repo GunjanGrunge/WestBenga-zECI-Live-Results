@@ -75,6 +75,43 @@
       letter-spacing: 0;
     }
 
+    .bjp-title {
+      display: inline-block;
+      color: var(--bjp);
+      background: linear-gradient(90deg, #ff8f2d 0%, #ffb04f 45%, #35b86b 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 22px rgba(242, 138, 47, 0.18);
+    }
+
+    .eci-title {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 1px;
+      white-space: nowrap;
+    }
+
+    .eci-title span {
+      -webkit-text-fill-color: currentColor;
+      text-shadow: 0 0 18px rgba(79, 149, 222, 0.22);
+    }
+
+    .eci-title .eci-e { color: #ff9933; }
+    .eci-title .eci-c { color: #f7fbff; }
+    .eci-title .eci-i { color: #138808; }
+
+    .eci-title::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      margin-left: 3px;
+      border-radius: 999px;
+      background: #1f5faa;
+      box-shadow: 0 0 0 3px rgba(31, 95, 170, 0.2);
+      transform: translateY(-1px);
+    }
+
     .sub {
       color: var(--muted);
       font-size: 13px;
@@ -104,6 +141,7 @@
       border-radius: 999px;
       background: #56d987;
       box-shadow: 0 0 0 4px rgba(86, 217, 135, 0.15);
+      animation: livePulse 1.8s ease-in-out infinite;
     }
 
     .toolbar {
@@ -152,7 +190,13 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      animation: riseIn 420ms ease both;
     }
+
+    .card:nth-child(2) { animation-delay: 50ms; }
+    .card:nth-child(3) { animation-delay: 100ms; }
+    .card:nth-child(4) { animation-delay: 150ms; }
+    .card:nth-child(5) { animation-delay: 200ms; }
 
     .card-head {
       display: flex;
@@ -219,6 +263,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 14px;
+      animation: riseIn 460ms ease both;
     }
 
     .duel-party {
@@ -306,6 +351,11 @@
 
     .duel-scale span:first-child { background: var(--bjp); }
     .duel-scale span:last-child { background: var(--tmc); }
+
+    .duel-scale span {
+      transition: background-color 180ms ease, opacity 180ms ease;
+      animation: scaleGlow 2.6s ease-in-out infinite;
+    }
 
     .duel-note {
       color: var(--muted);
@@ -458,6 +508,7 @@
       display: block;
       height: 100%;
       background: linear-gradient(90deg, #5ca7e8, #72d28f);
+      transition: width 360ms ease;
     }
 
     .prob {
@@ -475,6 +526,8 @@
 
     .prob .mini-bar span {
       background: linear-gradient(90deg, #f0c463, #63d989);
+      background-size: 160% 100%;
+      animation: barShine 2.8s linear infinite;
     }
 
     .muted { color: var(--muted); }
@@ -494,6 +547,35 @@
 
     .empty-row td::before {
       display: none;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(86, 217, 135, 0.15); transform: scale(1); }
+      50% { box-shadow: 0 0 0 7px rgba(86, 217, 135, 0.08); transform: scale(1.08); }
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes barShine {
+      0% { background-position: 0 0; }
+      100% { background-position: 160% 0; }
+    }
+
+    @keyframes scaleGlow {
+      0%, 100% { opacity: 0.92; }
+      50% { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     @media (max-width: 1040px) {
@@ -593,7 +675,7 @@
         <div class="title-row">
           <div>
             <div class="kicker">Assembly Results Dashboard</div>
-            <h1>West Bengal ECI Live Results</h1>
+            <h1><span class="bjp-title">West Bengal</span> <span class="eci-title" aria-label="ECI"><span class="eci-e">E</span><span class="eci-c">C</span><span class="eci-i">I</span></span> Live Results</h1>
             <div class="sub">Data loads from a local results snapshot refreshed from ECI by GitHub Actions. Browser polling is every 10 seconds; the page refreshes every 2 minutes.</div>
           </div>
           <div class="live-pill"><span class="live-dot"></span><span>Live snapshot</span></div>
