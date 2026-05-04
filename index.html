@@ -356,6 +356,92 @@
       font-size: 13px;
     }
 
+    .close-contests {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .close-contests-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .close-contests-header:hover { background: var(--panel-2); }
+    .close-contests-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+    }
+    .close-contests-chips {
+      display: flex;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .close-chip {
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .close-chip.bjp { background: var(--bjp-soft); color: var(--bjp); }
+    .close-chip.tmc { background: var(--tmc-soft); color: var(--tmc); }
+    .close-toggle-icon { font-size: 13px; color: var(--muted); transition: transform .2s; }
+    .close-toggle-icon.open { transform: rotate(180deg); }
+    .close-threshold {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .close-threshold input {
+      width: 72px;
+      background: var(--panel-2);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 3px 8px;
+      text-align: right;
+    }
+    .close-body { display: none; border-top: 1px solid var(--line); }
+    .close-body.open { display: block; }
+    .close-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .close-col { padding: 12px 16px; }
+    .close-col + .close-col { border-left: 1px solid var(--line); }
+    .close-col-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 8px;
+    }
+    .close-col-title.bjp { color: var(--bjp); }
+    .close-col-title.tmc { color: var(--tmc); }
+    .close-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      gap: 8px;
+    }
+    .close-row:last-child { border-bottom: none; }
+    .close-const { color: var(--text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .close-margin { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 12px; }
+    .close-empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
+
     .status-left {
       min-height: 20px;
     }
@@ -802,8 +888,35 @@
         </div>
       </div>
 
+      <div class="close-contests" id="closeContests">
+        <div class="close-contests-header" id="closeHeader">
+          <span class="close-contests-title">⚡ Close Contests</span>
+          <div class="close-threshold">
+            Margin ≤
+            <input type="number" id="closeThreshold" value="2000" min="0" step="100">
+            votes
+          </div>
+          <div class="close-contests-chips">
+            <span class="close-chip bjp">BJP <span id="closeBjpCount">-</span></span>
+            <span class="close-chip tmc">TMC <span id="closeTmcCount">-</span></span>
+          </div>
+          <span class="close-toggle-icon" id="closeIcon">▼</span>
+        </div>
+        <div class="close-body" id="closeBody">
+          <div class="close-grid">
+            <div class="close-col">
+              <div class="close-col-title bjp">BJP leading</div>
+              <div id="closeBjpList"></div>
+            </div>
+            <div class="close-col">
+              <div class="close-col-title tmc">TMC leading</div>
+              <div id="closeTmcList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="table-wrap">
-        <table>
           <colgroup>
             <col style="width: 74px">
             <col style="width: 210px">
@@ -1047,13 +1160,44 @@
         updateDuel(data, payload.summary);
         $('status').textContent = `Loaded ${data.length} constituencies in ${payload.elapsed}s. Next local poll in 10s.`;
         render();
+        if ($('closeBody').classList.contains('open')) renderCloseContests();
       } catch (error) {
         $('status').innerHTML = `<span class="error">Could not load results: ${error.message}</span>`;
       }
     }
 
-    // Column header click-to-sort
-    document.querySelectorAll('th.sortable').forEach((th) => {
+    // Close Contests panel
+    function renderCloseContests() {
+      const threshold = parseInt($('closeThreshold').value, 10) || 2000;
+      const bjpClose = data.filter((r) => r.leading_party === BJP && (r.margin || 0) <= threshold && (r.margin || 0) > 0)
+                           .sort((a, b) => a.margin - b.margin);
+      const tmcClose = data.filter((r) => r.leading_party === TMC && (r.margin || 0) <= threshold && (r.margin || 0) > 0)
+                           .sort((a, b) => a.margin - b.margin);
+
+      $('closeBjpCount').textContent = bjpClose.length;
+      $('closeTmcCount').textContent = tmcClose.length;
+
+      const makeList = (rows) => rows.length
+        ? rows.map((r) => `<div class="close-row"><span class="close-const">${r.constituency}</span><span class="close-margin">+${fmt.format(r.margin)}</span></div>`).join('')
+        : '<div class="close-empty">None</div>';
+
+      $('closeBjpList').innerHTML = makeList(bjpClose);
+      $('closeTmcList').innerHTML = makeList(tmcClose);
+    }
+
+    $('closeHeader').addEventListener('click', () => {
+      const body = $('closeBody');
+      const icon = $('closeIcon');
+      const open = body.classList.toggle('open');
+      icon.classList.toggle('open', open);
+      if (open) renderCloseContests();
+    });
+
+    $('closeThreshold').addEventListener('input', renderCloseContests);
+    // Stop header click from toggling when clicking the input
+    $('closeThreshold').addEventListener('click', (e) => e.stopPropagation());
+
+    // Column header click-to-sort    document.querySelectorAll('th.sortable').forEach((th) => {
       th.addEventListener('click', () => {
         const key = th.dataset.sort;
         if (sortState.key === key) {
