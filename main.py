@@ -6,6 +6,8 @@ import json
 import math
 import os
 import re
+import ssl
+import subprocess
 import threading
 import time
 import urllib.error
@@ -37,17 +39,14 @@ cache_lock = threading.Lock()
 
 
 def fetch_text(url: str) -> str:
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 ECI live dashboard",
-            "Accept": "text/html,application/xhtml+xml",
-            "Cache-Control": "no-cache",
-        },
+    result = subprocess.run(
+        ["curl", "-s", "--max-time", str(REQUEST_TIMEOUT_SECONDS), url],
+        capture_output=True,
+        timeout=REQUEST_TIMEOUT_SECONDS + 5,
     )
-    with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
-        raw = response.read()
-    return raw.decode("utf-8", errors="replace")
+    if result.returncode != 0:
+        raise urllib.error.URLError(f"curl error {result.returncode}: {result.stderr.decode()}")
+    return result.stdout.decode("utf-8", errors="replace")
 
 
 def clean_text(value: str) -> str:
