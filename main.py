@@ -27,7 +27,7 @@ POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "10"))
 PAGE_REFRESH_SECONDS = int(os.environ.get("PAGE_REFRESH_SECONDS", "120"))
 STATE_CACHE_SECONDS = int(os.environ.get("STATE_CACHE_SECONDS", "10"))
 DETAIL_CACHE_SECONDS = int(os.environ.get("DETAIL_CACHE_SECONDS", "60"))
-DETAIL_WORKERS = int(os.environ.get("DETAIL_WORKERS", "18"))
+DETAIL_WORKERS = int(os.environ.get("DETAIL_WORKERS", "6"))
 REQUEST_TIMEOUT_SECONDS = int(os.environ.get("REQUEST_TIMEOUT_SECONDS", "10"))
 
 BJP = "Bharatiya Janata Party"
@@ -38,15 +38,18 @@ detail_cache: dict[str, dict[str, Any]] = {}
 cache_lock = threading.Lock()
 
 
-def fetch_text(url: str) -> str:
-    result = subprocess.run(
-        ["curl", "-s", "--max-time", str(REQUEST_TIMEOUT_SECONDS), url],
-        capture_output=True,
-        timeout=REQUEST_TIMEOUT_SECONDS + 5,
-    )
-    if result.returncode != 0:
-        raise urllib.error.URLError(f"curl error {result.returncode}: {result.stderr.decode()}")
-    return result.stdout.decode("utf-8", errors="replace")
+def fetch_text(url: str, retries: int = 3) -> str:
+    for attempt in range(retries):
+        result = subprocess.run(
+            ["curl", "-s", "--max-time", str(REQUEST_TIMEOUT_SECONDS), url],
+            capture_output=True,
+            timeout=REQUEST_TIMEOUT_SECONDS + 5,
+        )
+        if result.returncode == 0:
+            return result.stdout.decode("utf-8", errors="replace")
+        if attempt < retries - 1:
+            time.sleep(2 ** attempt)  # 1s, 2s backoff
+    raise urllib.error.URLError(f"curl error {result.returncode}: {result.stderr.decode()}")
 
 
 def clean_text(value: str) -> str:
