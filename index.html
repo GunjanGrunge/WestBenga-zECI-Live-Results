@@ -414,6 +414,16 @@
       height: 48px;
     }
 
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    th.sortable::after { content: ' ⇅'; opacity: 0.35; font-size: 11px; }
+    th.sorted-asc::after  { content: ' ↑'; opacity: 1; }
+    th.sorted-desc::after { content: ' ↓'; opacity: 1; }
+    th.sortable:hover { background: #1e2e42; }
+
     tr:hover td { background: #151f2b; }
 
     .num {
@@ -809,16 +819,16 @@
           </colgroup>
           <thead>
             <tr>
-              <th>AC</th>
+              <th data-sort="constituency_no" class="sortable sorted-asc">AC</th>
               <th>Constituency</th>
-              <th class="num">BJP Votes</th>
-              <th class="num">TMC Votes</th>
+              <th class="num sortable" data-sort="bjp_votes">BJP Votes</th>
+              <th class="num sortable" data-sort="tmc_votes">TMC Votes</th>
               <th>Party In Lead</th>
-              <th class="num">Round Done</th>
-              <th class="num">Round Left</th>
-              <th class="num">% Lead</th>
-              <th class="num">Prob. To Win</th>
-              <th class="num">Margin</th>
+              <th class="num sortable" data-sort="round_done">Round Done</th>
+              <th class="num sortable" data-sort="round_left">Round Left</th>
+              <th class="num sortable" data-sort="lead_pct">% Lead</th>
+              <th class="num sortable" data-sort="probability">Prob. To Win</th>
+              <th class="num sortable" data-sort="margin">Margin</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -863,6 +873,7 @@
     const HIGH_COUNTED_PROGRESS = 0.7;
 
     let data = [];
+    let sortState = { key: 'constituency_no', asc: true };
     const fmt = new Intl.NumberFormat('en-IN');
     const $ = (id) => document.getElementById(id);
 
@@ -966,7 +977,13 @@
       const q = $('search').value.trim().toLowerCase();
       const party = $('partyFilter').value;
       const district = $('districtFilter').value;
-      const sortBy = $('sortBy').value;
+
+      // sync dropdown → sortState
+      const dropVal = $('sortBy').value;
+      if (dropVal !== sortState.key) {
+        sortState = { key: dropVal, asc: dropVal === 'constituency_no' };
+      }
+
       let rows = data.filter((row) => {
         const matchesSearch = !q || row.constituency.toLowerCase().includes(q);
         const matchesParty = !party
@@ -976,7 +993,19 @@
         return matchesSearch && matchesParty && matchesDistrict;
       });
 
-      rows.sort((a, b) => sortBy === 'constituency_no' ? a.constituency_no - b.constituency_no : (b[sortBy] || 0) - (a[sortBy] || 0));
+      rows.sort((a, b) => {
+        const { key, asc } = sortState;
+        const va = a[key] ?? 0, vb = b[key] ?? 0;
+        return asc ? (va > vb ? 1 : va < vb ? -1 : 0) : (vb > va ? 1 : vb < va ? -1 : 0);
+      });
+
+      // update th sort indicators
+      document.querySelectorAll('th.sortable').forEach((th) => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.dataset.sort === sortState.key) {
+          th.classList.add(sortState.asc ? 'sorted-asc' : 'sorted-desc');
+        }
+      });
 
       if (!rows.length) {
         $('rows').innerHTML = `<tr class="empty-row"><td colspan="11"><div class="empty-state">No constituencies match the current filters.</div></td></tr>`;
@@ -1022,6 +1051,20 @@
         $('status').innerHTML = `<span class="error">Could not load results: ${error.message}</span>`;
       }
     }
+
+    // Column header click-to-sort
+    document.querySelectorAll('th.sortable').forEach((th) => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.sort;
+        if (sortState.key === key) {
+          sortState.asc = !sortState.asc;
+        } else {
+          sortState = { key, asc: key === 'constituency_no' };
+        }
+        $('sortBy').value = key;
+        render();
+      });
+    });
 
     ['search', 'partyFilter', 'districtFilter', 'sortBy'].forEach((id) => $(id).addEventListener('input', render));
     refresh();
